@@ -1,0 +1,3537 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencarian Kelulusan SMPN 3 Batam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .gold-text {
+            color: #fbbf24;
+        }
+        .btn-search {
+            background: linear-gradient(90deg, #fbbf24 0%, #d97706 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+        }
+        .result-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold gold-text mb-2">SMP NEGERI 3 BATAM</h1>
+            <p class="text-gray-300 text-sm">Sistem Pencarian Data Kelulusan Siswa</p>
+        </div>
+
+        <!-- Search Box -->
+        <div class="glass-card rounded-2xl p-6 mb-6">
+            <label class="block text-sm font-medium mb-2 text-gray-200">Masukkan Nomor NISN</label>
+            <div class="relative">
+                <input type="number" id="nisnInput" placeholder="Contoh: 0119305692" 
+                    class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all">
+            </div>
+            <button onclick="searchStudent()" 
+                class="w-full mt-4 btn-search text-blue-900 font-bold py-3 rounded-xl shadow-lg">
+                Cari Data Siswa
+            </button>
+        </div>
+
+        <!-- Result Area -->
+        <div id="resultArea" class="hidden">
+            <!-- Content will be injected here by JS -->
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-xs text-gray-400">
+            &copy; 2026 SMP Negeri 3 Batam. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        // Data Siswa dari File Excel (Dikonversi ke JSON)
+        const students = [
+  {
+    "NISN": "119305692",
+    "Nama Siswa": "MARIQ ADITYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114411403",
+    "Nama Siswa": "RAKHA NUGRAHA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105752467",
+    "Nama Siswa": "ADITYA SURYA DINATA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3114059633",
+    "Nama Siswa": "TEUKU ALFA RIZI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3109423290",
+    "Nama Siswa": "MUHAMMAD NURYAHYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113686701",
+    "Nama Siswa": "FANNISA LUISA KHADIJAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106866151",
+    "Nama Siswa": "SILVIA WINDY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109628783",
+    "Nama Siswa": "Yuyun Angraeni",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104802413",
+    "Nama Siswa": "AURANI CAHAYA PERMATA BARLY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102461216",
+    "Nama Siswa": "Akbar Mulki Renziro Drafi",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104388055",
+    "Nama Siswa": "ARPANDI MARULITUA SIALLAGAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114574794",
+    "Nama Siswa": "DWI NUR AMALINA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105097647",
+    "Nama Siswa": "Muzafar Al Azzam",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108617849",
+    "Nama Siswa": "SELOMITA YULISA MANALU",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115366629",
+    "Nama Siswa": "DONA NOVITA SYAHPUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106723667",
+    "Nama Siswa": "RAFA GALIH LINTAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104275090",
+    "Nama Siswa": "KEYZA HAURA PUTRY HANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108400740",
+    "Nama Siswa": "ELISA SIMANJUNTAK",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3116910953",
+    "Nama Siswa": "ANGGITA VALENCIA SIREGAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104474841",
+    "Nama Siswa": "DEVINA MAHARANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101748597",
+    "Nama Siswa": "CAHAYA CRISTINE SITUMORANG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102025454",
+    "Nama Siswa": "KHAIRA ARLETA MULIA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116071427",
+    "Nama Siswa": "AYYATUL HUSNAA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3109658492",
+    "Nama Siswa": "WAN FIRMAN SYAFEI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104210790",
+    "Nama Siswa": "RESTU ETIKA SARI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "91291119",
+    "Nama Siswa": "KHOIRIL RAMADHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107922960",
+    "Nama Siswa": "INDAH KASIH AULIA BATUBARA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106913395",
+    "Nama Siswa": "DHIYA ASSYFA KEISHA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119258634",
+    "Nama Siswa": "SALMA NABILA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117911498",
+    "Nama Siswa": "Adriel Silaban",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3112785345",
+    "Nama Siswa": "LUTHFI ARDIAN CAHYANTI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3115994318",
+    "Nama Siswa": "MOCHAMMAD KHADAFI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114766722",
+    "Nama Siswa": "NAZWA AINUR YASMIN RIFGIANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102840650",
+    "Nama Siswa": "ADEKIA FAJAR CASAVANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119216401",
+    "Nama Siswa": "SYAHWENDRA BERLIN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106984915",
+    "Nama Siswa": "KIANDRA GHANIY PUTRA GEGHA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114071244",
+    "Nama Siswa": "SALSABILLA SYIFA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104219855",
+    "Nama Siswa": "ELISA NURRAHMANIA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113155722",
+    "Nama Siswa": "GABRIELLA ANNABEL NAPITUPULU",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118973341",
+    "Nama Siswa": "FAKHIRAH SHAKILA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112969127",
+    "Nama Siswa": "NAYRA CAHYA PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108650755",
+    "Nama Siswa": "ANISA DWI ARIANTI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3117813126",
+    "Nama Siswa": "AZ ZAHRA MAULIDA RAHMAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108167259",
+    "Nama Siswa": "JERIKO MANUEL PURBA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3109576349",
+    "Nama Siswa": "SHANDY MALIAKI MANIK",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109817050",
+    "Nama Siswa": "ALIKA GUSNIASI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106457692",
+    "Nama Siswa": "Kanaya Riskia Rosa",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "91471026",
+    "Nama Siswa": "MUHAMMAD FERREL JUMIHADY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109111754",
+    "Nama Siswa": "WEINI PUTRI RAMADHANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107362245",
+    "Nama Siswa": "SAFIRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102018160",
+    "Nama Siswa": "JULIAN BANI FAHREZI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102252980",
+    "Nama Siswa": "FITRAH ISKANDAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108496912",
+    "Nama Siswa": "RAFA VISADA POHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115720643",
+    "Nama Siswa": "KAYLA ZALPA RANGKUTI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104816200",
+    "Nama Siswa": "FERDINAN IMMANUEL NADAPDAP",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "96777074",
+    "Nama Siswa": "FINO S O RETNAM KUMAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "92083241",
+    "Nama Siswa": "SATRIA NURLIZA SIHOTANG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117096051",
+    "Nama Siswa": "FAKHIRA AZAHRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111622724",
+    "Nama Siswa": "Wafiq Ulwan Fachrurrazi",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102556660",
+    "Nama Siswa": "RIZKI NUR SYAHBANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3115355433",
+    "Nama Siswa": "MONICA FEBY NATASYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105430253",
+    "Nama Siswa": "EDDWIN MARCEL SIAGIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101313905",
+    "Nama Siswa": "ANGELINE CORRI MANIK",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109739822",
+    "Nama Siswa": "KEISYA JELYAN NUR AFFIKA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107395574",
+    "Nama Siswa": "RAJAA MU'AMMAR RABBANII",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107148217",
+    "Nama Siswa": "MUHAMMAD AIDIL FITRAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3115326199",
+    "Nama Siswa": "NEFA JOENIAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116049494",
+    "Nama Siswa": "PUTRI MAYZORA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112896737",
+    "Nama Siswa": "INDRIANA RUTH LUMBANTORUAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113235544",
+    "Nama Siswa": "Silvestrelli Thomas Stewart Emmanuel",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3100009226",
+    "Nama Siswa": "Rista Natalia Simanungkalit",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101027541",
+    "Nama Siswa": "SAHDAN RIO SYAHPUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115313571",
+    "Nama Siswa": "BALQIS ZALFAA SAPUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109126652",
+    "Nama Siswa": "ANANDA AMANATULLAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105522074",
+    "Nama Siswa": "ARIF ALGIFARI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112600676",
+    "Nama Siswa": "MUHAMMAD ZIDANE SAPUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104660750",
+    "Nama Siswa": "REDNIA SIBURIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3100657251",
+    "Nama Siswa": "ANISSA NOVITA DEVI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103936885",
+    "Nama Siswa": "DEWI SARTIKA SIHOTANG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115344518",
+    "Nama Siswa": "MUHAMMAD PRATAMA ASMARAKHAI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118356346",
+    "Nama Siswa": "RIFKI ALFARIZI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101509795",
+    "Nama Siswa": "INDAH RAMADANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3109467098",
+    "Nama Siswa": "KAMILIA IZATUL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108423488",
+    "Nama Siswa": "FAUZAN ALMER AULIA MUHLUDIN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102859773",
+    "Nama Siswa": "JANUAR RIFQI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105534637",
+    "Nama Siswa": "Derell Akbar Miki Ferdinand",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "126223918",
+    "Nama Siswa": "MICHAEL LUMBANBATU",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106178198",
+    "Nama Siswa": "DILAN FAHMIANSYAH SUGIANTO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117174219",
+    "Nama Siswa": "LASRI PANE",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118314571",
+    "Nama Siswa": "ALYA NAILA ZHAFIRAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115442891",
+    "Nama Siswa": "KENSHIN ATHALLAH ZAMZAMI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108681720",
+    "Nama Siswa": "RAESHA DWI ARIENDRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105600100",
+    "Nama Siswa": "BOY ROITO HARIANTO HUTAURUK",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "123423083",
+    "Nama Siswa": "MARLENE JOYCELINE SINURAT",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3110713493",
+    "Nama Siswa": "HABILA FITRIANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107327301",
+    "Nama Siswa": "NUR ALEESYA ZAHIAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104330915",
+    "Nama Siswa": "APRIANA SIAHAAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117168800",
+    "Nama Siswa": "YAMANDA IVANA PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104272342",
+    "Nama Siswa": "RADIAH ZAWANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106943909",
+    "Nama Siswa": "MAWAR AMELIA SIHOMBING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "92725216",
+    "Nama Siswa": "DAFFA RIZKIARJUNA BAJAVA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102841607",
+    "Nama Siswa": "ABIGAEL ZYE FUNYA MOHENDRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103550391",
+    "Nama Siswa": "DANIEL FARIZ ARIF PUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104247498",
+    "Nama Siswa": "EKA JOHANES PARNINGOTAN SINAGA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "93772906",
+    "Nama Siswa": "OCTAVIA ANDINI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103564133",
+    "Nama Siswa": "JUAN FELIX SIJABAT",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113067414",
+    "Nama Siswa": "NURUL IZZAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112038646",
+    "Nama Siswa": "CRAEL TOSI NAINGGOLAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105111684",
+    "Nama Siswa": "farhan fermanto",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109688345",
+    "Nama Siswa": "Nazwa Zahira Zikra",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107706558",
+    "Nama Siswa": "SRI SUCI RAMADHANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109368784",
+    "Nama Siswa": "JUSTIN ADRIANO SIANTURI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105870659",
+    "Nama Siswa": "ARFA EDWARDO SETIAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118752209",
+    "Nama Siswa": "Vincent Luiz Siagian",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107522359",
+    "Nama Siswa": "ALDIN RABBANI SYAHPUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3115511973",
+    "Nama Siswa": "ALFIN NAUFAL DZAKWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104896199",
+    "Nama Siswa": "CHIEVO RAMADHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102927483",
+    "Nama Siswa": "NABILLA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105254971",
+    "Nama Siswa": "NANDIKA RANU SARFARAZ",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106647094",
+    "Nama Siswa": "RANI JULIANA SIGALINGGING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119286882",
+    "Nama Siswa": "RAYHAN APRIANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113612323",
+    "Nama Siswa": "Luvita Anriani",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102438171",
+    "Nama Siswa": "ANDIKA PRATAMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111829507",
+    "Nama Siswa": "ANDIE AZZAM UBAIDILLAH SALIMY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101895047",
+    "Nama Siswa": "MUHAMMAD AZRIL ALFIQI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102318240",
+    "Nama Siswa": "PUTRI NUR AINI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112752331",
+    "Nama Siswa": "SAMUEL GIAN BELE BAI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112066294",
+    "Nama Siswa": "LADY GRACELA TAMBUNAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105266506",
+    "Nama Siswa": "GRACE MIKA TOBING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108172670",
+    "Nama Siswa": "HAYKAL HAFIDHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102632083",
+    "Nama Siswa": "NAJWA NATASYA PILIHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101119425",
+    "Nama Siswa": "Ibnu Wahyu Ramadan",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107526238",
+    "Nama Siswa": "Syaqilla Regina Kinanti",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102043131",
+    "Nama Siswa": "ABDULLAH FAIZ DAGISTANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104618682",
+    "Nama Siswa": "ALYSSA PUTRI RAMADHANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107850419",
+    "Nama Siswa": "Zidane Willy Hermansyah",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112688969",
+    "Nama Siswa": "RIO FERDIANSYAH DALIMUNTHE",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118941178",
+    "Nama Siswa": "NADIEN ADELLIA HARAHAP",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102686728",
+    "Nama Siswa": "RAJA GEMA GUSTIANDA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106510310",
+    "Nama Siswa": "NAINA PUTRI NEREN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109583468",
+    "Nama Siswa": "LINTANG PUTRA RAMADHAN DERMAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3106995710",
+    "Nama Siswa": "KALISTA DARA PUTRI K.Y",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105206646",
+    "Nama Siswa": "MUHAMMAD FARIS YUSUF HABIBIE",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113694288",
+    "Nama Siswa": "claris velicya putri",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108888547",
+    "Nama Siswa": "FADHIL ALRIANSYAH PRATAMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3110454920",
+    "Nama Siswa": "Naila Dzatur Rahmah",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101464812",
+    "Nama Siswa": "LEDI MARITO SIMANJUNTAK",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105577287",
+    "Nama Siswa": "TRISTY BULAN SARI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109866887",
+    "Nama Siswa": "MIKAEL MARINA JASTIN LUMBAN TOBING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104111617",
+    "Nama Siswa": "MUHAMMAD GIBRAN AL AZIZ",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109313583",
+    "Nama Siswa": "QIRANA ADEVIA PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111569181",
+    "Nama Siswa": "MUHAMMAD ADLI REZA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114151421",
+    "Nama Siswa": "RAFFA NAVIS PUTRAFARAS",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107478246",
+    "Nama Siswa": "ARMANDO FILIPPUS TAMPUBOLON",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101744700",
+    "Nama Siswa": "DAFFA ALFARIZI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118379971",
+    "Nama Siswa": "ZELFIA AISYAH PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106060078",
+    "Nama Siswa": "GITA LESTARI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106168725",
+    "Nama Siswa": "DWI SUSANTI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119968092",
+    "Nama Siswa": "Refangga Maranggi Parulian Tampubolon",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103940037",
+    "Nama Siswa": "ZIRA AL SHABIRO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3101657499",
+    "Nama Siswa": "SEPBRINA DEANTI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3095150920",
+    "Nama Siswa": "DEWIANA ANGELITA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104539128",
+    "Nama Siswa": "DESWITA DWI PUTRI MAHARANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104577028",
+    "Nama Siswa": "SAMARA DWI ANANDA BR SEMBIRING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108481196",
+    "Nama Siswa": "Delvan Alfahrezi",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103415316",
+    "Nama Siswa": "EFAN TAUFIK FIRDAUS",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116639573",
+    "Nama Siswa": "Keandra Rizky Prasetyo",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103945736",
+    "Nama Siswa": "REYNO ALDHI YANO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101364144",
+    "Nama Siswa": "MUHAMMAD TOLIB",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101669378",
+    "Nama Siswa": "FAISHAL RAHMAT DAKHILULLAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106894873",
+    "Nama Siswa": "Khanaya Afipa Ramadhani",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107177076",
+    "Nama Siswa": "ANUGERAH URBANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3107836373",
+    "Nama Siswa": "ZAIDAN FADHIL ALTAF MELIALA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102109169",
+    "Nama Siswa": "VIRA ANGGRAINI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111708172",
+    "Nama Siswa": "IDZAM ABSA SAISENA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101376613",
+    "Nama Siswa": "Juniarti",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116553390",
+    "Nama Siswa": "ADI ARGA SITORUS",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116054626",
+    "Nama Siswa": "DILARA SHIFAN ANNASYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108199777",
+    "Nama Siswa": "Arkan Muzhaffar Idham Munthe",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104433489",
+    "Nama Siswa": "M. KHAIRUL MUSTHAFHA SOBANDI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108569669",
+    "Nama Siswa": "FITRI RAHMA DANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111956050",
+    "Nama Siswa": "KENZO HASIAN GRACIANO SITOMPUL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104280158",
+    "Nama Siswa": "AISYAH RAMADHANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112677817",
+    "Nama Siswa": "EMBUN CAHYANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104134633",
+    "Nama Siswa": "YOSIA GADDIEL SITOHANG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113023519",
+    "Nama Siswa": "FAIZ SYATHIR ANWAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113392948",
+    "Nama Siswa": "NOMI FEBRIANTI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106518704",
+    "Nama Siswa": "PURNAMA SARI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114811303",
+    "Nama Siswa": "FATHIR AKBAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105611525",
+    "Nama Siswa": "BATRISYIA SYAKIRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108829770",
+    "Nama Siswa": "DINA RAMADANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104413851",
+    "Nama Siswa": "MUHAMAD FAHMI SYAFIQ",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115386302",
+    "Nama Siswa": "Raytama Immanuel Silaban",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105524450",
+    "Nama Siswa": "Muhammad Salman Al Rasyid",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116307323",
+    "Nama Siswa": "ARTHA KEZO PONGMANAPA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108918709",
+    "Nama Siswa": "ZALVA FABIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102956554",
+    "Nama Siswa": "NOVITA ADELIA PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106710686",
+    "Nama Siswa": "YUANITA ANATASYA NESYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117794360",
+    "Nama Siswa": "FAHELMANSYAH FADILLAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105164064",
+    "Nama Siswa": "Delvia Agusti Rizwana",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103074961",
+    "Nama Siswa": "Muhaisyah Rustyanty Rengen",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113205088",
+    "Nama Siswa": "ADARA BERYL SANDHITA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101568516",
+    "Nama Siswa": "MUHAMMAD ZULFAQQAR MUJIRATULLAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118215011",
+    "Nama Siswa": "Jasmine Hans Chika",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101409953",
+    "Nama Siswa": "MUHAMMAD IQBAL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103925216",
+    "Nama Siswa": "Alifa Pramadita",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101955273",
+    "Nama Siswa": "FARRELL OTHO ZACHARY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102613605",
+    "Nama Siswa": "NAYSIAH PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117997388",
+    "Nama Siswa": "BELVA FAIZAN AQHAR SYADDAAD",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105394112",
+    "Nama Siswa": "Yudha Bintang Angkasawan",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106386858",
+    "Nama Siswa": "ATHAR GHIFARI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117345840",
+    "Nama Siswa": "DAFFA PUTRANYA FARDIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105738580",
+    "Nama Siswa": "Gita",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112768046",
+    "Nama Siswa": "Muhammad Afdillah Nasruddin",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104994685",
+    "Nama Siswa": "APRILIA DIAPHENIA RI SIHOMBING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113497470",
+    "Nama Siswa": "AZZURA ZAHWA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115183286",
+    "Nama Siswa": "TASYA DWI NABILA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101302820",
+    "Nama Siswa": "PEPE AGUSTINA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113342843",
+    "Nama Siswa": "SETIA FOURTUNA SIMATUPANG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112661508",
+    "Nama Siswa": "NAROTUA HUTAPEA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108494818",
+    "Nama Siswa": "ANASTASIA PASKALIA SILALAHI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116838227",
+    "Nama Siswa": "TAKAHIRO AFIF ARUNDIKA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114988584",
+    "Nama Siswa": "GRACE WITHY PRAYER SIAHAAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104871627",
+    "Nama Siswa": "NURHAFIDAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "99511481",
+    "Nama Siswa": "KEYSA NADINE SAGITA SANTOSO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108527334",
+    "Nama Siswa": "DENI LISTIAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116613925",
+    "Nama Siswa": "Keysia Axdila Tarigan",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107773505",
+    "Nama Siswa": "MULYADI MICHAEL LUMBAN GAOL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107678168",
+    "Nama Siswa": "M. FAREL HUTRI RAMADHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118264271",
+    "Nama Siswa": "ADE REZKI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103028643",
+    "Nama Siswa": "ASSYIFA NAYLA PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109692263",
+    "Nama Siswa": "M BRAVIO RAGAZZI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104792001",
+    "Nama Siswa": "APRIANI SIAHAAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103549947",
+    "Nama Siswa": "FAZILA AMANDA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103332704",
+    "Nama Siswa": "ELSA SIMANJUNTAK",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108381324",
+    "Nama Siswa": "FIKHA DWI ANDINA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104794611",
+    "Nama Siswa": "SILVER ALGECIRAS FIORY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102452579",
+    "Nama Siswa": "CLARISSA ALTHAFUNNISA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104923377",
+    "Nama Siswa": "Dhafa Hamzah Ariansyah",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "82756707",
+    "Nama Siswa": "Ahmad Sultan Hasyim",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105220587",
+    "Nama Siswa": "ZULFIKAR FIQORI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108878833",
+    "Nama Siswa": "ARDIANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105573339",
+    "Nama Siswa": "LEONI JAMAR NINI SITUMEANG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113025845",
+    "Nama Siswa": "DIAJENG MARSHA CATOER POETRI ZAKARIA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109680139",
+    "Nama Siswa": "RIKHADATUL AZKIA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102590497",
+    "Nama Siswa": "NABILA OKTAVIANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116781064",
+    "Nama Siswa": "MARCELA KAREEN HASIHOLAN LIM",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107034390",
+    "Nama Siswa": "MUHAMMAD FARHAN PRATAMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101786434",
+    "Nama Siswa": "MUHAMMAD IRFAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104826876",
+    "Nama Siswa": "SALWA ATSILAH SHAFA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102306579",
+    "Nama Siswa": "Raynalnd Sinambela",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111835059",
+    "Nama Siswa": "ADELIN FYKA YUNIAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101484444",
+    "Nama Siswa": "MESSI MAULANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115962499",
+    "Nama Siswa": "LATIFAH ASMI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106315855",
+    "Nama Siswa": "ALGAZORA HAMKA TINSAFARO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109315925",
+    "Nama Siswa": "KAYLA AMANDA SYAHPITRY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "93837800",
+    "Nama Siswa": "MARUBA MALAU",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118142142",
+    "Nama Siswa": "REINA ALYSHA WIBOWO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101038644",
+    "Nama Siswa": "ALIF RAHMAN HAKIM",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119333348",
+    "Nama Siswa": "ZIREH NAZARET SIMANULLANG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111461641",
+    "Nama Siswa": "PRISKILA PUTRI VALENTIN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104597213",
+    "Nama Siswa": "RAY NANDA TOGATOROP",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113319150",
+    "Nama Siswa": "Togu Mahendra Sitompul",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106357365",
+    "Nama Siswa": "HARUMI AYANE",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101591128",
+    "Nama Siswa": "Firrena Eka Putri",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111586280",
+    "Nama Siswa": "KEVIN HOSEA TUMANGGOR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "94071298",
+    "Nama Siswa": "AGUS PRATAMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106178700",
+    "Nama Siswa": "RENDY PRATAMA SIANTURI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106913511",
+    "Nama Siswa": "DESTYLA CHAIRUNISA PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115206822",
+    "Nama Siswa": "TOGI PANGIHUTAN HUTAGAOL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102593304",
+    "Nama Siswa": "NATASYA LOVELY LADY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109518694",
+    "Nama Siswa": "RADEN MUHAMAD RAFI KHAIRULLAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107896944",
+    "Nama Siswa": "MARSEL KLAUDYA SIHALOHO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101693554",
+    "Nama Siswa": "DZAKI KHAIRULLAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107749122",
+    "Nama Siswa": "SAVANNAH LASHKARY DIO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109957661",
+    "Nama Siswa": "AIRIN YUNITA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102605483",
+    "Nama Siswa": "ALLFIAN NEVIN NAPITU",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113570688",
+    "Nama Siswa": "VIERRA PUTERI VELENCIA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103761147",
+    "Nama Siswa": "LEONEL GUNAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3117860937",
+    "Nama Siswa": "FARRAS NAILAH ARKANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113965918",
+    "Nama Siswa": "YESIKA CAROLIN SIAHAAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113957245",
+    "Nama Siswa": "TIYASA HESI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107436653",
+    "Nama Siswa": "GZA SARTIWI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105846225",
+    "Nama Siswa": "TYASIGKA PRATIWI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102411503",
+    "Nama Siswa": "M. ANDRI PRAWIJAYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119603303",
+    "Nama Siswa": "DWI SYAHPUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "95539790",
+    "Nama Siswa": "YAN AGUSTIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "98573150",
+    "Nama Siswa": "SHERRYN ARUM MAHARANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117562725",
+    "Nama Siswa": "AISYAH DELFINA BINTI MOH SADIQ",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3113522439",
+    "Nama Siswa": "FEBRIAN NABILISQI GUNAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104014180",
+    "Nama Siswa": "WILLY ALBERT RIADY TOBING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106936360",
+    "Nama Siswa": "MUHAMMAD LABIB NICOLAS",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116292060",
+    "Nama Siswa": "Zakia Khadijah",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106970963",
+    "Nama Siswa": "IMAYANA MARIA SINAGA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102160327",
+    "Nama Siswa": "NOVI PUTRI ARSILIA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106057851",
+    "Nama Siswa": "LILIS KARLINA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118744354",
+    "Nama Siswa": "ADILLA QUINNSHA ZULATIFAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108365282",
+    "Nama Siswa": "MUHAMMAD FAHRI ZAELANI ZULKARNAIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101914313",
+    "Nama Siswa": "FAHMI PRATAMA SYAHPUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118604087",
+    "Nama Siswa": "ZAHIRA HANA ELISHA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104453814",
+    "Nama Siswa": "ANASTASYA RONA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104760022",
+    "Nama Siswa": "ULFAT SENA SAPUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115805042",
+    "Nama Siswa": "CELLICA AMIRASANSARI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112796576",
+    "Nama Siswa": "ALMIRA SYAHIDA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109740226",
+    "Nama Siswa": "ALFA ONE GABE DOS PAULA TAMPUBOLON",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102959925",
+    "Nama Siswa": "AWAN SATRIO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103840498",
+    "Nama Siswa": "Revand Renaldi Panjaitan",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108829199",
+    "Nama Siswa": "ADITYA SAPUTRA PRAMADIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "93310275",
+    "Nama Siswa": "YOSAN PATRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107420878",
+    "Nama Siswa": "RAFAEL JULYAN PAKPAHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102310648",
+    "Nama Siswa": "MUHAMMAD LUTHFII ARYA HAMIZAN FAKHRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109588952",
+    "Nama Siswa": "NABILA FATHARANI HANDOYO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107262071",
+    "Nama Siswa": "MUHAMMAD FITTO SAPUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112674665",
+    "Nama Siswa": "CLARESYA TAMBUNAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106989426",
+    "Nama Siswa": "WIKHO ALTHOF BILQISTHI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3112034042",
+    "Nama Siswa": "ALDI FEBRIANTO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103012498",
+    "Nama Siswa": "KZA SARTIKA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112175439",
+    "Nama Siswa": "PUTRI ANGGITA AZ-ZAHRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115441456",
+    "Nama Siswa": "FRANS KRISTIAN PARDEDE",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106797853",
+    "Nama Siswa": "PUTRI AYU NOVITA SINAGA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102743083",
+    "Nama Siswa": "WINDU GISTARI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103442111",
+    "Nama Siswa": "RICHO RAFAEL PUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119574269",
+    "Nama Siswa": "HANA HUMAIRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111070704",
+    "Nama Siswa": "NAIRA FAZILATUNNISA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107307534",
+    "Nama Siswa": "THERESA CLAUDIA RAHMAWATI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109565334",
+    "Nama Siswa": "RADITYA SAPUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108012826",
+    "Nama Siswa": "RATU CLAUDIA LAFATUNNISA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106561903",
+    "Nama Siswa": "DIKA ARDIANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109428939",
+    "Nama Siswa": "MUHAMMAD HABIB KUSUMA WARDHANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106656306",
+    "Nama Siswa": "RAFA FIRMANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107805284",
+    "Nama Siswa": "ASYLLA PUTRI RAMADHANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109638493",
+    "Nama Siswa": "DANIEL NOPRIYANTO SIALLAGAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113064435",
+    "Nama Siswa": "Rahma Chairunnisya Dahyar",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109429946",
+    "Nama Siswa": "HAIRIL FADLI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112124622",
+    "Nama Siswa": "ATHAYA FATHIAN GAOZHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "98891691",
+    "Nama Siswa": "BINTANG MUTIARA SIHOMBING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104227677",
+    "Nama Siswa": "RIFQII OCTA DARMAWAN SIHALOHO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "96194580",
+    "Nama Siswa": "Sufi Maulana",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109086401",
+    "Nama Siswa": "RIRIN RUTMAWATI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115428930",
+    "Nama Siswa": "NABILA SATIVA APRIANI PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109295655",
+    "Nama Siswa": "ALZENA RUTHSANIYYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118294333",
+    "Nama Siswa": "Shabiya Kalea Rachmadi",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108052656",
+    "Nama Siswa": "SAFA ANGELITA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "127874032",
+    "Nama Siswa": "AVISA QUEEN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105873959",
+    "Nama Siswa": "RAISHA AFIFAH PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103790985",
+    "Nama Siswa": "SADDAM AKHORI KURNIADI YUSUF",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108104501",
+    "Nama Siswa": "MUHAMMAD AKMAL MAULANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102659405",
+    "Nama Siswa": "MOHAMMAD AL RAJA BUDIMAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105214850",
+    "Nama Siswa": "MUHAMAD MAULANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106187687",
+    "Nama Siswa": "RAFHAEL ARJUNA MAHENDRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114337833",
+    "Nama Siswa": "M. RAZAQ KHAIRUL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116640121",
+    "Nama Siswa": "RENO NEVADA DESPERADO PANGARIBUAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118463436",
+    "Nama Siswa": "MARIA MAGDALENA LUMBAN GAOL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106081130",
+    "Nama Siswa": "Akram Al Baihaqi",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107972263",
+    "Nama Siswa": "AZZAHRA AHSA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106804250",
+    "Nama Siswa": "HIZKIA ALFARESA BAKO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112922434",
+    "Nama Siswa": "Sonia Marisabeth Simbolon",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101134720",
+    "Nama Siswa": "BOLIVIA JENNSEN BR TOBING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113586323",
+    "Nama Siswa": "JOSUA NICKY ARMANDA BUTARBUTAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107214018",
+    "Nama Siswa": "HARLYNO PASHA HERMAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107379355",
+    "Nama Siswa": "YESKIA TESALONIKA SIMANJUNTAK",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "92851393",
+    "Nama Siswa": "AIRA ADHA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103979538",
+    "Nama Siswa": "MUHAMMAD REYVAN ALDERREN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108658361",
+    "Nama Siswa": "CLARA ADELINA AGUSTIN PURBA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106950367",
+    "Nama Siswa": "ADELIA MIRZA ATMARIANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107047853",
+    "Nama Siswa": "ADIVIANSYAH RAHMAT RAMADHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119739805",
+    "Nama Siswa": "FATIN AYRA ADREENA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106710527",
+    "Nama Siswa": "AZ ZAHRA MULYANDARI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103622725",
+    "Nama Siswa": "MARCELL LASRO TUA SIRAIT",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105562857",
+    "Nama Siswa": "M. RIZKI SEPTIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101516443",
+    "Nama Siswa": "Aatikah Khairullah",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106129476",
+    "Nama Siswa": "OTHARI RASIYAH RAMADHANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106839342",
+    "Nama Siswa": "FABIO HAFUZA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114834351",
+    "Nama Siswa": "BILQIS INKA SYAKILA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113199636",
+    "Nama Siswa": "Fahrend Rafael Simamora",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105129331",
+    "Nama Siswa": "NUR FITRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107458013",
+    "Nama Siswa": "ADARA NURFIANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105308490",
+    "Nama Siswa": "NAZWA AZWIRA SYAFITRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108718419",
+    "Nama Siswa": "PUTRI PRUDENCE",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105072050",
+    "Nama Siswa": "BISMA AFLAH RADITYA HARTONO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104771577",
+    "Nama Siswa": "FADHIL FADHALI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106437226",
+    "Nama Siswa": "RENDY ARDHIANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108563459",
+    "Nama Siswa": "KIYANDRA PAMUNGKAS",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116138495",
+    "Nama Siswa": "FIKRI FAQIH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105415153",
+    "Nama Siswa": "BAIHAQI ALHAFIZH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111735538",
+    "Nama Siswa": "HERLY SINTARA SIMBOLON",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112181039",
+    "Nama Siswa": "ANINDITA AZZAHRA HARAHAP",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119318411",
+    "Nama Siswa": "ATHORIQ AHMAD BARAT",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101192756",
+    "Nama Siswa": "GYBRAN ABYGAIL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103809352",
+    "Nama Siswa": "ANIS LULU FADILAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118637215",
+    "Nama Siswa": "MUHAMMAD BAGATUR DYALMOKO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104368509",
+    "Nama Siswa": "ROVENCES YOSAVAT SITUMEANG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107497227",
+    "Nama Siswa": "Zivana Alayya Putri",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112106630",
+    "Nama Siswa": "ASHILA ZULAIKHA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104240718",
+    "Nama Siswa": "AFIFAH SINURAYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118577057",
+    "Nama Siswa": "ARYA BRATADIKARA TANDUKLANGI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108276846",
+    "Nama Siswa": "Nabil Hazlam Ahsana",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108681803",
+    "Nama Siswa": "RIFQI HIDAYAT",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119147338",
+    "Nama Siswa": "SANDRIA NAOMI LDYDIA PASARIBU",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113793834",
+    "Nama Siswa": "Liyana Zahirah Ananta Hoddo",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114363678",
+    "Nama Siswa": "ATHAYA KHANSA DHAU DASORI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3104572977",
+    "Nama Siswa": "ACHMAD LUTHFI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119806019",
+    "Nama Siswa": "ATHAYA KHANSA ANDIKA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118514798",
+    "Nama Siswa": "HARIS ALVIAN SIMARMATA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111585070",
+    "Nama Siswa": "Feva Meisa",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118979771",
+    "Nama Siswa": "AFRYANDI HAYKAL PUTRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117782069",
+    "Nama Siswa": "I Putu Andrayuga",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114339294",
+    "Nama Siswa": "Naomita Anggraeny Situmorang",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108233649",
+    "Nama Siswa": "Ayuanita Firman",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103742672",
+    "Nama Siswa": "MARIA ANABELLA SIRINGORINGO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111567491",
+    "Nama Siswa": "DUBAI AVRAM VIRHAQI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109156039",
+    "Nama Siswa": "ARDAN TITO APRILIANTO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "123365849",
+    "Nama Siswa": "STEVEN IMMANUEL AUSTIN SITUMEANG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109847986",
+    "Nama Siswa": "WINDA VERLITA TAMBUNAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101287114",
+    "Nama Siswa": "DEVINO IBRA MAULANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101513348",
+    "Nama Siswa": "VICTOR GABRIEL SIREGAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119448819",
+    "Nama Siswa": "ARGA PUTRA YADI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102684168",
+    "Nama Siswa": "ANINDAH GADIZA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107425485",
+    "Nama Siswa": "SHARMILA SHALEHA SYUKUR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107206913",
+    "Nama Siswa": "MUHAMMAD RAFA FIRMANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103410835",
+    "Nama Siswa": "ELVINDRA APRILIANO TAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3108969519",
+    "Nama Siswa": "TENGKU ABU HISAMUDIN SYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103273389",
+    "Nama Siswa": "ALVINO GIVSON SILALAHI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105074449",
+    "Nama Siswa": "SHINTYA REBECCA SIREGAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104933915",
+    "Nama Siswa": "NOVITA NAPITUPULU",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102229076",
+    "Nama Siswa": "NANCY OCTAVIA ABIGAIL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114565632",
+    "Nama Siswa": "SHAKILLA NAZWA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109154546",
+    "Nama Siswa": "Mikail Ardhan Alvaro",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3119323825",
+    "Nama Siswa": "PETRA ALFONSO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112481310",
+    "Nama Siswa": "SELYNAYSILLA INDAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115340797",
+    "Nama Siswa": "RAJWA ASHILAH NADINE",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108104672",
+    "Nama Siswa": "MUHAMMAD RISKY GUNAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118361961",
+    "Nama Siswa": "FIORENZA NATASYA AUTRIN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3106540094",
+    "Nama Siswa": "MUHAMAD NAUFAL HADI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103810816",
+    "Nama Siswa": "MUHAMMAD RIDWAN FADILAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115251707",
+    "Nama Siswa": "Sarah Marsa Nathania",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119389689",
+    "Nama Siswa": "SIVA STEFANI SAMOSIR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114603731",
+    "Nama Siswa": "YIZREEL HENRY WIJAYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109557870",
+    "Nama Siswa": "DZAKY FURQAN SYAHBANDI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109273986",
+    "Nama Siswa": "RAFLI ANDADINATA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104363490",
+    "Nama Siswa": "ABDIEL ALFAYED",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "162797179",
+    "Nama Siswa": "SHEYLA ARTHA FALILA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115437767",
+    "Nama Siswa": "Fakhri Naufal Lesa Laode",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102995440",
+    "Nama Siswa": "MUHAMMAD RAMADHANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118912757",
+    "Nama Siswa": "Dina Rahmania",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105097232",
+    "Nama Siswa": "NADINE CANTIKA WIJAYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105405935",
+    "Nama Siswa": "NATALISTI SUMAA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109460726",
+    "Nama Siswa": "Irsyadul Fikri",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105815468",
+    "Nama Siswa": "ZHAHWA AHZAHRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115665373",
+    "Nama Siswa": "AFIFAH ZAHRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101945806",
+    "Nama Siswa": "NABILA RAMADHANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109665530",
+    "Nama Siswa": "Agus Ramadanu",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106475397",
+    "Nama Siswa": "RIFKA AGUSTINA HUTASOIT",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104244932",
+    "Nama Siswa": "ANDRE ELIANSEN AMBARITA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111513346",
+    "Nama Siswa": "REBECCA GLORY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108320717",
+    "Nama Siswa": "ABID CAHYA ARDIANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106170461",
+    "Nama Siswa": "FIRMAN SANTOSO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108578648",
+    "Nama Siswa": "Farisa Regalia Putri",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103728415",
+    "Nama Siswa": "MUHAMMAD FARDHAN AL FARIZZI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101553256",
+    "Nama Siswa": "AULIA RAHMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103637959",
+    "Nama Siswa": "KHAIRISSA SEPTIANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111802309",
+    "Nama Siswa": "GEMBIRA FRANSISKUS SINAGA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "97231493",
+    "Nama Siswa": "FARYL MULYA KUSUMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108076103",
+    "Nama Siswa": "ANGGI MEYSHA PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107021345",
+    "Nama Siswa": "KHANSA PUNIA ANIQAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "92953312",
+    "Nama Siswa": "BUNGA DESTIKA HARAHAP",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112888305",
+    "Nama Siswa": "Sarah Jelita Siagian",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119695137",
+    "Nama Siswa": "GERALDO CARLOS PASARIBU",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105167653",
+    "Nama Siswa": "MUHAMMAD DAFA RENDI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109672913",
+    "Nama Siswa": "SALSA NURUL ASIQIN.E",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103087644",
+    "Nama Siswa": "ALYSA TRIHAPSA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104239071",
+    "Nama Siswa": "PUTRI KUMAIRAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107594806",
+    "Nama Siswa": "Nabiilah Syahfitri",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111622913",
+    "Nama Siswa": "Yasrul Amrullah",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103032879",
+    "Nama Siswa": "MHEMEY ESTERINA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105747008",
+    "Nama Siswa": "Rafael Yosef Kalinowski Situmorang",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107526328",
+    "Nama Siswa": "ALMIRA PUTRI ALEYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3119233874",
+    "Nama Siswa": "MUHAMMAD RAZIQ RIFA'I",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107797840",
+    "Nama Siswa": "MOHAMMAD RA'AFA JUBAIR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117167257",
+    "Nama Siswa": "ATIKA OLIVIA SARAGI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106733087",
+    "Nama Siswa": "MUHAMMAD DANISH HIDAYAT",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105184445",
+    "Nama Siswa": "CHRISTIAN GULTOM",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103052697",
+    "Nama Siswa": "MUHAMMAD DAFA ISMAIL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102765062",
+    "Nama Siswa": "MUHAMMAD FERDY GUNAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102183449",
+    "Nama Siswa": "SAMUEL JECKSON BUTAR BUTAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102834932",
+    "Nama Siswa": "MUHAMMAD FENDERICO PUTRA PRATAMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111201093",
+    "Nama Siswa": "ANISA RAHMADANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106234776",
+    "Nama Siswa": "PURWO SASONGKO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108980632",
+    "Nama Siswa": "MUHAMMAD ZAKY ULWAAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106162005",
+    "Nama Siswa": "Marvelian Ahmad Devano",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115706672",
+    "Nama Siswa": "PAREL TINO TARIHORAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107087802",
+    "Nama Siswa": "LETICIA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103938018",
+    "Nama Siswa": "FITRI HASRA HUMMAIRAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101068236",
+    "Nama Siswa": "NAZYLA SAHLA ANANTA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109393103",
+    "Nama Siswa": "ADVENTNIA NOVITA KRISTIANI PANJAITAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114660305",
+    "Nama Siswa": "NUR FAHIRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101333908",
+    "Nama Siswa": "ZAKI FADLUR RAHMAN. M",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102067527",
+    "Nama Siswa": "RAHMA SAFITRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102020969",
+    "Nama Siswa": "NUR AINI KHAIRINNISA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3113181121",
+    "Nama Siswa": "MELANI AULYA PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "95688782",
+    "Nama Siswa": "Ridho Irama",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104914275",
+    "Nama Siswa": "AHMAD FIKRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102726583",
+    "Nama Siswa": "Elviana Elva Cahyani",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107991451",
+    "Nama Siswa": "Novitri Tiara Zahira",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117801119",
+    "Nama Siswa": "ATIQAH HAURA ALINI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114251460",
+    "Nama Siswa": "KALEB MANURUNG",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3109024583",
+    "Nama Siswa": "SYAFIRA NURLITA ANDRIANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105582481",
+    "Nama Siswa": "ADRIAN LEGAWA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105637006",
+    "Nama Siswa": "KEVIN AQLAN FAIZ ADITAMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107319049",
+    "Nama Siswa": "DIANIERA EIGHT BUTARBUTAR",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102316782",
+    "Nama Siswa": "FIORELITA LILIANA NASTITI WIYOKO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "117716493",
+    "Nama Siswa": "RAKYAN HARYO WISANGGENI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104775590",
+    "Nama Siswa": "MUHAMMAD KHALID",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102061462",
+    "Nama Siswa": "ATTAYA KALA KAMIL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107810280",
+    "Nama Siswa": "ARAI VALENTZAHID RAMDANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116212015",
+    "Nama Siswa": "NEYSA AINUN MAHYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109800673",
+    "Nama Siswa": "SAYYID IBRAHIM SARTELY",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105870523",
+    "Nama Siswa": "RINALTY DINIA LOVE",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109779863",
+    "Nama Siswa": "LAILATUL NAZWA KHAIRUNNISA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106017536",
+    "Nama Siswa": "AIREN RENATA SIMANJUNTAK",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104334735",
+    "Nama Siswa": "DHIYA SALSABILA PUTRI ANDIKA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111007102",
+    "Nama Siswa": "GRETY APRILIA SIMAMORA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116957789",
+    "Nama Siswa": "R. MUHAMMAD SEBASTIAN RAMADDAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102027233",
+    "Nama Siswa": "TERESYA ANANTA LOURE HUTAGAOL",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103866705",
+    "Nama Siswa": "REZVAN HENDRAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101512665",
+    "Nama Siswa": "KARISA INDRIA AMELIA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119701041",
+    "Nama Siswa": "AMIRA NORAINI KHOIRUNNISYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119994250",
+    "Nama Siswa": "Muhammad Hassby",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "102912417",
+    "Nama Siswa": "MUHAMMAD FARREL FERDIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106586604",
+    "Nama Siswa": "JALILLAH RAMADHANTI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106778648",
+    "Nama Siswa": "Sabrina Nur Fitriyana",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103883329",
+    "Nama Siswa": "Tifanny Aulia Elfitri",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109864040",
+    "Nama Siswa": "AIRRA SYAHQUITA AZHANI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118262419",
+    "Nama Siswa": "MUHAMMAD FATHIR FATH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101838768",
+    "Nama Siswa": "DHAFIRO BAYU ADHITAMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113462939",
+    "Nama Siswa": "NESY MARIA TAMPUBOLON",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "108148270",
+    "Nama Siswa": "EXSAUDI ARION SIAHAAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111736006",
+    "Nama Siswa": "MUHAMMAD KHALAF ARIF MAULANA ZELMI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101995018",
+    "Nama Siswa": "MUHAMMAD AR RAZI RAMADHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114836925",
+    "Nama Siswa": "MUHAMMAD SYAFI ANUGRAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109132539",
+    "Nama Siswa": "NADHIF ADITYA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "111343635",
+    "Nama Siswa": "FOMALHAUT MUHAMMAD ALDERI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "115663929",
+    "Nama Siswa": "Jenny Lusiyana Lubis",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106838998",
+    "Nama Siswa": "ADILA AZURA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "104295060",
+    "Nama Siswa": "SULTAN FAREL APRILIAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107443067",
+    "Nama Siswa": "MUHAMMAD ZERICO ABIDIN AL-SUDAISH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106328090",
+    "Nama Siswa": "ADORA ADELIA ROHAYU",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109959382",
+    "Nama Siswa": "ABIYZZHAFRAN ADITA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "116966288",
+    "Nama Siswa": "BUNGA LEONIE SARASWATI SIHOMBING",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "106788394",
+    "Nama Siswa": "DEWI KARTIKA CHANDRA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "109463975",
+    "Nama Siswa": "RADITYA NUR RAMADHAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "112027759",
+    "Nama Siswa": "ANDRE GUNAWAN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107239823",
+    "Nama Siswa": "SYARIFH NURMANSYAH",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "105621761",
+    "Nama Siswa": "OCTAVIA MELISA PUTRI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "99691880",
+    "Nama Siswa": "RIZKY ADI NUGROHO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "92777640",
+    "Nama Siswa": "LEWI PUTRA AMBARITA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113043346",
+    "Nama Siswa": "M. FEBRIAN NAZARBIRUN",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3105587452",
+    "Nama Siswa": "FAHRY ANGGARA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "113113804",
+    "Nama Siswa": "NARADHISTY KHAIRINDA KUSUMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "3107976027",
+    "Nama Siswa": "FELICIA PUTRI ARNELIA TAMPUBOLON",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "118588569",
+    "Nama Siswa": "GILANG PRATAMA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "101645125",
+    "Nama Siswa": "ANUGRAH ADITRA FAHMI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "114912925",
+    "Nama Siswa": "ARDINDA PUTRIANA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "107254602",
+    "Nama Siswa": "MUHAMMAD BAYU SEGARA",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "103237016",
+    "Nama Siswa": "MUHAMMAD LUTHFI",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  },
+  {
+    "NISN": "119385945",
+    "Nama Siswa": "AMAR AMPO",
+    "Ketarangan": "LULUS",
+    "KELAS": "IX"
+  }
+];
+
+        function searchStudent() {
+            const input = document.getElementById('nisnInput').value.trim();
+            const resultArea = document.getElementById('resultArea');
+            
+            if (!input) {
+                alert("Silakan masukkan NISN terlebih dahulu!");
+                return;
+            }
+
+            // Mencari siswa berdasarkan NISN
+            const student = students.find(s => s.NISN === input);
+
+            if (student) {
+                resultArea.innerHTML = `
+                    <div class="glass-card rounded-2xl p-6 result-card border-l-4 border-yellow-400">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold text-white">${student["Nama Siswa"]}</h2>
+                            <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">LULUS</span>
+                        </div>
+                        <div class="space-y-3 text-sm text-gray-200">
+                            <div class="flex justify-between border-b border-white/10 pb-2">
+                                <span>NISN</span>
+                                <span class="font-mono font-bold">${student.NISN}</span>
+                            </div>
+                            <div class="flex justify-between border-b border-white/10 pb-2">
+                                <span>Kelas</span>
+                                <span class="font-bold">${student.KELAS}</span>
+                            </div>
+                            <div class="flex justify-between pt-1">
+                                <span>Status Kelulusan</span>
+                                <span class="font-bold text-yellow-400">${student.Ketarangan}</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 text-center">
+                            <p class="text-xs text-gray-400 italic">"Selamat! Teruslah berprestasi."</p>
+                        </div>
+                    </div>
+                `;
+                resultArea.classList.remove('hidden');
+            } else {
+                resultArea.innerHTML = `
+                    <div class="glass-card rounded-2xl p-6 result-card text-center border-l-4 border-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-red-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 class="text-lg font-bold text-white mb-1">Data Tidak Ditemukan</h3>
+                        <p class="text-sm text-gray-300">Pastikan NISN yang Anda masukkan sudah benar.</p>
+                    </div>
+                `;
+                resultArea.classList.remove('hidden');
+            }
+        }
+
+        // Allow Enter key to trigger search
+        document.getElementById('nisnInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                searchStudent();
+            }
+        });
+    </script>
+</body>
+</html>
