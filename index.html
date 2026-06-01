@@ -6,14 +6,21 @@
     <title>Pencarian NISN - SMP Negeri 3 Batam</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
         body { font-family: 'Poppins', sans-serif; }
         .glass-effect {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        /* Animasi sederhana */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
         }
     </style>
 </head>
@@ -21,9 +28,10 @@
 
     <div class="max-w-md w-full glass-effect rounded-2xl shadow-xl overflow-hidden">
         <!-- Header -->
-        <div class="bg-blue-600 p-6 text-center">
-            <h1 class="text-2xl font-bold text-white">Pencarian NISN</h1>
-            <p class="text-blue-100 text-sm mt-1">SMP Negeri 3 Batam</p>
+        <div class="bg-blue-600 p-6 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform -skew-y-6"></div>
+            <h1 class="text-2xl font-bold text-white relative z-10">Pencarian NISN</h1>
+            <p class="text-blue-100 text-sm mt-1 relative z-10">SMP Negeri 3 Batam</p>
         </div>
 
         <div class="p-6 space-y-6">
@@ -31,71 +39,674 @@
             <!-- Bagian Pencarian -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Cari Berdasarkan Nama</label>
-                <div class="relative">
-                    <input type="text" id="searchName" placeholder="Masukkan nama siswa..." 
-                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                <div class="relative group">
+                    <input type="text" id="searchName" placeholder="Ketik nama siswa..." 
+                           class="w-full pl-4 pr-12 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition shadow-sm">
+                    
+                    <!-- Tombol Cari -->
+                    <button onclick="lakukanPencarian()" class="absolute right-2 top-2 bg-blue-600 hover:bg-blue-700 text-white p-1.5 rounded-md transition duration-200 shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
                 </div>
+                <p class="text-xs text-gray-400 mt-2 ml-1">Tekan Enter atau klik ikon kaca pembesar.</p>
             </div>
 
-            <!-- Hasil Pencarian -->
-            <div id="resultContainer" class="space-y-3 max-h-60 overflow-y-auto pr-1">
-                <p class="text-center text-sm text-gray-500 italic">Ketik nama untuk mencari...</p>
+            <!-- Area Hasil -->
+            <div id="resultArea" class="hidden">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Hasil Pencarian</h3>
+                <div id="resultContainer" class="space-y-3 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+                    <!-- Kartu hasil akan muncul di sini -->
+                </div>
+            </div>
+            
+            <!-- Pesan Default / Kosong -->
+            <div id="defaultMsg" class="text-center py-8 text-gray-400">
+                <div class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16l2.879-2.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p class="text-sm">Silakan masukkan nama untuk mencari data NISN.</p>
             </div>
 
         </div>
         
-        <div class="bg-gray-50 p-4 text-center text-xs text-gray-400">
+        <div class="bg-gray-50 p-4 text-center text-xs text-gray-400 border-t border-gray-100">
             &copy; 2026 SMP Negeri 3 Batam
         </div>
     </div>
 
-    <!-- Memuat data dari file eksternal -->
-    <script src="data.js"></script>
-
     <script>
+        // DATA SISWA (Sudah diperbaiki formatnya)
+        const studentData = [
+            { nisn: "0119305692", nama: "MARIQ ADITYA" },
+            { nisn: "0114411403", nama: "RAKHA NUGRAHA" },
+            { nisn: "0105752467", nama: "ADITYA SURYA DINATA" },
+            { nisn: "3114059633", nama: "TEUKU ALFA RIZI" },
+            { nisn: "3109423290", nama: "MUHAMMAD NURYAHYA" },
+            { nisn: "0113686701", nama: "FANNISA LUISA KHADIJAH" },
+            { nisn: "0106866151", nama: "SILVIA WINDY" },
+            { nisn: "0109628783", nama: "Yuyun Angraeni" },
+            { nisn: "0104802413", nama: "AURANI CAHAYA PERMATA BARLY" },
+            { nisn: "0102461216", nama: "Akbar Mulki Renziro Drafi" },
+            { nisn: "0104388055", nama: "ARPANDI MARULITUA SIALLAGAN" },
+            { nisn: "0114574794", nama: "DWI NUR AMALINA" },
+            { nisn: "0105097647", nama: "Muzafar Al Azzam" },
+            { nisn: "0108617849", nama: "SELOMITA YULISA MANALU" },
+            { nisn: "0115366629", nama: "DONA NOVITA SYAHPUTRA" },
+            { nisn: "0106723667", nama: "RAFA GALIH LINTAR" },
+            { nisn: "0104275090", nama: "KEYZA HAURA PUTRY HANA" },
+            { nisn: "0108400740", nama: "ELISA SIMANJUNTAK" },
+            { nisn: "3116910953", nama: "ANGGITA VALENCIA SIREGAR" },
+            { nisn: "0104474841", nama: "DEVINA MAHARANI" },
+            { nisn: "0101748597", nama: "CAHAYA CRISTINE SITUMORANG" },
+            { nisn: "0102025454", nama: "KHAIRA ARLETA MULIA" },
+            { nisn: "0116071427", nama: "AYYATUL HUSNAA" },
+            { nisn: "3109658492", nama: "WAN FIRMAN SYAFEI" },
+            { nisn: "0104210790", nama: "RESTU ETIKA SARI" },
+            { nisn: "0091291119", nama: "KHOIRIL RAMADHAN" },
+            { nisn: "0107922960", nama: "INDAH KASIH AULIA BATUBARA" },
+            { nisn: "0106913395", nama: "DHIYA ASSYFA KEISHA" },
+            { nisn: "0119258634", nama: "SALMA NABILA" },
+            { nisn: "0117911498", nama: "Adriel Silaban" },
+            { nisn: "3112785345", nama: "LUTHFI ARDIAN CAHYANTI" },
+            { nisn: "3115994318", nama: "MOCHAMMAD KHADAFI" },
+            { nisn: "0114766722", nama: "NAZWA AINUR YASMIN RIFGIANA" },
+            { nisn: "0102840650", nama: "ADEKIA FAJAR CASAVANI" },
+            { nisn: "0119216401", nama: "SYAHWENDRA BERLIN" },
+            { nisn: "0106984915", nama: "KIANDRA GHANIY PUTRA GEGHA" },
+            { nisn: "0114071244", nama: "SALSABILLA SYIFA" },
+            { nisn: "0104219855", nama: "ELISA NURRAHMANIA" },
+            { nisn: "0113155722", nama: "GABRIELLA ANNABEL NAPITUPULU" },
+            { nisn: "0118973341", nama: "FAKHIRAH SHAKILA" },
+            { nisn: "0112969127", nama: "NAYRA CAHYA PUTRI" },
+            { nisn: "0108650755", nama: "ANISA DWI ARIANTI" },
+            { nisn: "3117813126", nama: "AZ ZAHRA MAULIDA RAHMAH" },
+            { nisn: "0108167259", nama: "JERIKO MANUEL PURBA" },
+            { nisn: "3109576349", nama: "SHANDY MALIAKI MANIK" },
+            { nisn: "0109817050", nama: "ALIKA GUSNIASI" },
+            { nisn: "0106457692", nama: "Kanaya Riskia Rosa" },
+            { nisn: "0091471026", nama: "MUHAMMAD FERREL JUMIHADY" },
+            { nisn: "0109111754", nama: "WEINI PUTRI RAMADHANI" },
+            { nisn: "0107362245", nama: "SAFIRA" },
+            { nisn: "0102018160", nama: "JULIAN BANI FAHREZI" },
+            { nisn: "0102252980", nama: "FITRAH ISKANDAR" },
+            { nisn: "0108496912", nama: "RAFA VISADA POHAN" },
+            { nisn: "0115720643", nama: "KAYLA ZALPA RANGKUTI" },
+            { nisn: "0104816200", nama: "FERDINAN IMMANUEL NADAPDAP" },
+            { nisn: "0096777074", nama: "FINO S O RETNAM KUMAR" },
+            { nisn: "0092083241", nama: "SATRIA NURLIZA SIHOTANG" },
+            { nisn: "0117096051", nama: "FAKHIRA AZAHRA" },
+            { nisn: "0111622724", nama: "Wafiq Ulwan Fachrurrazi" },
+            { nisn: "0102556660", nama: "RIZKI NUR SYAHBANI" },
+            { nisn: "3115355433", nama: "MONICA FEBY NATASYA" },
+            { nisn: "0105430253", nama: "EDDWIN MARCEL SIAGIAN" },
+            { nisn: "0101313905", nama: "ANGELINE CORRI MANIK" },
+            { nisn: "0109739822", nama: "KEISYA JELYAN NUR AFFIKA" },
+            { nisn: "0107395574", nama: "RAJAA MU'AMMAR RABBANII" },
+            { nisn: "0107148217", nama: "MUHAMMAD AIDIL FITRAH" },
+            { nisn: "3115326199", nama: "NEFA JOENIAR" },
+            { nisn: "0116049494", nama: "PUTRI MAYZORA" },
+            { nisn: "0112896737", nama: "INDRIANA RUTH LUMBANTORUAN" },
+            { nisn: "0113235544", nama: "Silvestrelli Thomas Stewart Emmanuel" },
+            { nisn: "3100009226", nama: "Rista Natalia Simanungkalit" },
+            { nisn: "0101027541", nama: "SAHDAN RIO SYAHPUTRA" },
+            { nisn: "0115313571", nama: "BALQIS ZALFAA SAPUTRI" },
+            { nisn: "0109126652", nama: "ANANDA AMANATULLAH" },
+            { nisn: "0105522074", nama: "ARIF ALGIFARI" },
+            { nisn: "0112600676", nama: "MUHAMMAD ZIDANE SAPUTRA" },
+            { nisn: "0104660750", nama: "REDNIA SIBURIAN" },
+            { nisn: "3100657251", nama: "ANISSA NOVITA DEVI" },
+            { nisn: "0103936885", nama: "DEWI SARTIKA SIHOTANG" },
+            { nisn: "0115344518", nama: "MUHAMMAD PRATAMA ASMARAKHAI" },
+            { nisn: "0118356346", nama: "RIFKI ALFARIZI" },
+            { nisn: "0101509795", nama: "INDAH RAMADANI" },
+            { nisn: "3109467098", nama: "KAMILIA IZATUL" },
+            { nisn: "0108423488", nama: "FAUZAN ALMER AULIA MUHLUDIN" },
+            { nisn: "0102859773", nama: "JANUAR RIFQI" },
+            { nisn: "0105534637", nama: "Derell Akbar Miki Ferdinand" },
+            { nisn: "0126223918", nama: "MICHAEL LUMBANBATU" },
+            { nisn: "0106178198", nama: "DILAN FAHMIANSYAH SUGIANTO" },
+            { nisn: "0117174219", nama: "LASRI PANE" },
+            { nisn: "0118314571", nama: "ALYA NAILA ZHAFIRAH" },
+            { nisn: "0115442891", nama: "KENSHIN ATHALLAH ZAMZAMI" },
+            { nisn: "0108681720", nama: "RAESHA DWI ARIENDRA" },
+            { nisn: "0105600100", nama: "BOY ROITO HARIANTO HUTAURUK" },
+            { nisn: "0123423083", nama: "MARLENE JOYCELINE SINURAT" },
+            { nisn: "3110713493", nama: "HABILA FITRIANSYAH" },
+            { nisn: "0107327301", nama: "NUR ALEESYA ZAHIAH" },
+            { nisn: "0104330915", nama: "APRIANA SIAHAAN" },
+            { nisn: "0117168800", nama: "YAMANDA IVANA PUTRI" },
+            { nisn: "0104272342", nama: "RADIAH ZAWANI" },
+            { nisn: "0106943909", nama: "MAWAR AMELIA SIHOMBING" },
+            { nisn: "0092725216", nama: "DAFFA RIZKIARJUNA BAJAVA" },
+            { nisn: "0102841607", nama: "ABIGAEL ZYE FUNYA MOHENDRA" },
+            { nisn: "0103550391", nama: "DANIEL FARIZ ARIF PUTRA" },
+            { nisn: "0104247498", nama: "EKA JOHANES PARNINGOTAN SINAGA" },
+            { nisn: "0093772906", nama: "OCTAVIA ANDINI" },
+            { nisn: "0103564133", nama: "JUAN FELIX SIJABAT" },
+            { nisn: "0113067414", nama: "NURUL IZZAH" },
+            { nisn: "0112038646", nama: "CRAEL TOSI NAINGGOLAN" },
+            { nisn: "0105111684", nama: "farhan fermanto" },
+            { nisn: "0109688345", nama: "Nazwa Zahira Zikra" },
+            { nisn: "0107706558", nama: "SRI SUCI RAMADHANI" },
+            { nisn: "0109368784", nama: "JUSTIN ADRIANO SIANTURI" },
+            { nisn: "0105870659", nama: "ARFA EDWARDO SETIAWAN" },
+            { nisn: "0118752209", nama: "Vincent Luiz Siagian" },
+            { nisn: "0107522359", nama: "ALDIN RABBANI SYAHPUTRA" },
+            { nisn: "3115511973", nama: "ALFIN NAUFAL DZAKWAN" },
+            { nisn: "0104896199", nama: "CHIEVO RAMADHAN" },
+            { nisn: "0102927483", nama: "NABILLA" },
+            { nisn: "0105254971", nama: "NANDIKA RANU SARFARAZ" },
+            { nisn: "0106647094", nama: "RANI JULIANA SIGALINGGING" },
+            { nisn: "0119286882", nama: "RAYHAN APRIANSYAH" },
+            { nisn: "0113612323", nama: "Luvita Anriani" },
+            { nisn: "0102438171", nama: "ANDIKA PRATAMA" },
+            { nisn: "0111829507", nama: "ANDIE AZZAM UBAIDILLAH SALIMY" },
+            { nisn: "0101895047", nama: "MUHAMMAD AZRIL ALFIQI" },
+            { nisn: "0102318240", nama: "PUTRI NUR AINI" },
+            { nisn: "0112752331", nama: "SAMUEL GIAN BELE BAI" },
+            { nisn: "0112066294", nama: "LADY GRACELA TAMBUNAN" },
+            { nisn: "0105266506", nama: "GRACE MIKA TOBING" },
+            { nisn: "0108172670", nama: "HAYKAL HAFIDHAN" },
+            { nisn: "0102632083", nama: "NAJWA NATASYA PILIHAN" },
+            { nisn: "0101119425", nama: "Ibnu Wahyu Ramadan" },
+            { nisn: "0107526238", nama: "Syaqilla Regina Kinanti" },
+            { nisn: "0102043131", nama: "ABDULLAH FAIZ DAGISTANI" },
+            { nisn: "0104618682", nama: "ALYSSA PUTRI RAMADHANI" },
+            { nisn: "0107850419", nama: "Zidane Willy Hermansyah" },
+            { nisn: "0112688969", nama: "RIO FERDIANSYAH DALIMUNTHE" },
+            { nisn: "0118941178", nama: "NADIEN ADELLIA HARAHAP" },
+            { nisn: "0102686728", nama: "RAJA GEMA GUSTIANDA" },
+            { nisn: "0106510310", nama: "NAINA PUTRI NEREN" },
+            { nisn: "0109583468", nama: "LINTANG PUTRA RAMADHAN DERMAWAN" },
+            { nisn: "3106995710", nama: "KALISTA DARA PUTRI K.Y" },
+            { nisn: "0105206646", nama: "MUHAMMAD FARIS YUSUF HABIBIE" },
+            { nisn: "0113694288", nama: "claris velicya putri" },
+            { nisn: "0108888547", nama: "FADHIL ALRIANSYAH PRATAMA" },
+            { nisn: "3110454920", nama: "Naila Dzatur Rahmah" },
+            { nisn: "0101464812", nama: "LEDI MARITO SIMANJUNTAK" },
+            { nisn: "0105577287", nama: "TRISTY BULAN SARI" },
+            { nisn: "0109866887", nama: "MIKAEL MARINA JASTIN LUMBAN TOBING" },
+            { nisn: "0104111617", nama: "MUHAMMAD GIBRAN AL AZIZ" },
+            { nisn: "0109313583", nama: "QIRANA ADEVIA PUTRI" },
+            { nisn: "0111569181", nama: "MUHAMMAD ADLI REZA" },
+            { nisn: "0114151421", nama: "RAFFA NAVIS PUTRAFARAS" },
+            { nisn: "0107478246", nama: "ARMANDO FILIPPUS TAMPUBOLON" },
+            { nisn: "0101744700", nama: "DAFFA ALFARIZI" },
+            { nisn: "0118379971", nama: "ZELFIA AISYAH PUTRI" },
+            { nisn: "0106060078", nama: "GITA LESTARI" },
+            { nisn: "0106168725", nama: "DWI SUSANTI" },
+            { nisn: "0119968092", nama: "Refangga Maranggi Parulian Tampubolon" },
+            { nisn: "0103940037", nama: "ZIRA AL SHABIRO" },
+            { nisn: "3101657499", nama: "SEPBRINA DEANTI" },
+            { nisn: "3095150920", nama: "DEWIANA ANGELITA" },
+            { nisn: "0104539128", nama: "DESWITA DWI PUTRI MAHARANI" },
+            { nisn: "0104577028", nama: "SAMARA DWI ANANDA BR SEMBIRING" },
+            { nisn: "0108481196", nama: "Delvan Alfahrezi" },
+            { nisn: "0103415316", nama: "EFAN TAUFIK FIRDAUS" },
+            { nisn: "0116639573", nama: "Keandra Rizky Prasetyo" },
+            { nisn: "0103945736", nama: "REYNO ALDHI YANO" },
+            { nisn: "0101364144", nama: "MUHAMMAD TOLIB" },
+            { nisn: "0101669378", nama: "FAISHAL RAHMAT DAKHILULLAH" },
+            { nisn: "0106894873", nama: "Khanaya Afipa Ramadhani" },
+            { nisn: "0107177076", nama: "ANUGERAH URBANSYAH" },
+            { nisn: "3107836373", nama: "ZAIDAN FADHIL ALTAF MELIALA" },
+            { nisn: "0102109169", nama: "VIRA ANGGRAINI" },
+            { nisn: "0111708172", nama: "IDZAM ABSA SAISENA" },
+            { nisn: "0101376613", nama: "Juniarti" },
+            { nisn: "0116553390", nama: "ADI ARGA SITORUS" },
+            { nisn: "0116054626", nama: "DILARA SHIFAN ANNASYA" },
+            { nisn: "0108199777", nama: "Arkan Muzhaffar Idham Munthe" },
+            { nisn: "0104433489", nama: "M. KHAIRUL MUSTHAFHA SOBANDI" },
+            { nisn: "0108569669", nama: "FITRI RAHMA DANI" },
+            { nisn: "0111956050", nama: "KENZO HASIAN GRACIANO SITOMPUL" },
+            { nisn: "0104280158", nama: "AISYAH RAMADHANI" },
+            { nisn: "0112677817", nama: "EMBUN CAHYANI" },
+            { nisn: "0104134633", nama: "YOSIA GADDIEL SITOHANG" },
+            { nisn: "0113023519", nama: "FAIZ SYATHIR ANWAR" },
+            { nisn: "0113392948", nama: "NOMI FEBRIANTI" },
+            { nisn: "0106518704", nama: "PURNAMA SARI" },
+            { nisn: "0114811303", nama: "FATHIR AKBAR" },
+            { nisn: "0105611525", nama: "BATRISYIA SYAKIRA" },
+            { nisn: "0108829770", nama: "DINA RAMADANI" },
+            { nisn: "0104413851", nama: "MUHAMAD FAHMI SYAFIQ" },
+            { nisn: "0115386302", nama: "Raytama Immanuel Silaban" },
+            { nisn: "0105524450", nama: "Muhammad Salman Al Rasyid" },
+            { nisn: "0116307323", nama: "ARTHA KEZO PONGMANAPA" },
+            { nisn: "0108918709", nama: "ZALVA FABIAN" },
+            { nisn: "0102956554", nama: "NOVITA ADELIA PUTRI" },
+            { nisn: "0106710686", nama: "YUANITA ANATASYA NESYA" },
+            { nisn: "0117794360", nama: "FAHELMANSYAH FADILLAH" },
+            { nisn: "0105164064", nama: "Delvia Agusti Rizwana" },
+            { nisn: "0103074961", nama: "Muhaisyah Rustyanty Rengen" },
+            { nisn: "0113205088", nama: "ADARA BERYL SANDHITA" },
+            { nisn: "0101568516", nama: "MUHAMMAD ZULFAQQAR MUJIRATULLAH" },
+            { nisn: "0118215011", nama: "Jasmine Hans Chika" },
+            { nisn: "0101409953", nama: "MUHAMMAD IQBAL" },
+            { nisn: "0103925216", nama: "Alifa Pramadita" },
+            { nisn: "0101955273", nama: "FARRELL OTHO ZACHARY" },
+            { nisn: "0102613605", nama: "NAYSIAH PUTRI" },
+            { nisn: "0117997388", nama: "BELVA FAIZAN AQHAR SYADDAAD" },
+            { nisn: "0105394112", nama: "Yudha Bintang Angkasawan" },
+            { nisn: "0106386858", nama: "ATHAR GHIFARI" },
+            { nisn: "0117345840", nama: "DAFFA PUTRANYA FARDIAN" },
+            { nisn: "0105738580", nama: "Gita" },
+            { nisn: "0112768046", nama: "Muhammad Afdillah Nasruddin" },
+            { nisn: "0104994685", nama: "APRILIA DIAPHENIA RI SIHOMBING" },
+            { nisn: "0113497470", nama: "AZZURA ZAHWA" },
+            { nisn: "0115183286", nama: "TASYA DWI NABILA" },
+            { nisn: "0101302820", nama: "PEPE AGUSTINA" },
+            { nisn: "0113342843", nama: "SETIA FOURTUNA SIMATUPANG" },
+            { nisn: "0112661508", nama: "NAROTUA HUTAPEA" },
+            { nisn: "0108494818", nama: "ANASTASIA PASKALIA SILALAHI" },
+            { nisn: "0116838227", nama: "TAKAHIRO AFIF ARUNDIKA" },
+            { nisn: "0114988584", nama: "GRACE WITHY PRAYER SIAHAAN" },
+            { nisn: "0104871627", nama: "NURHAFIDAH" },
+            { nisn: "0099511481", nama: "KEYSA NADINE SAGITA SANTOSO" },
+            { nisn: "0108527334", nama: "DENI LISTIAWAN" },
+            { nisn: "0116613925", nama: "Keysia Axdila Tarigan" },
+            { nisn: "0107773505", nama: "MULYADI MICHAEL LUMBAN GAOL" },
+            { nisn: "0107678168", nama: "M. FAREL HUTRI RAMADHAN" },
+            { nisn: "0118264271", nama: "ADE REZKI" },
+            { nisn: "0103028643", nama: "ASSYIFA NAYLA PUTRI" },
+            { nisn: "0109692263", nama: "M BRAVIO RAGAZZI" },
+            { nisn: "0104792001", nama: "APRIANI SIAHAAN" },
+            { nisn: "0103549947", nama: "FAZILA AMANDA" },
+            { nisn: "0103332704", nama: "ELSA SIMANJUNTAK" },
+            { nisn: "0108381324", nama: "FIKHA DWI ANDINA" },
+            { nisn: "0104794611", nama: "SILVER ALGECIRAS FIORY" },
+            { nisn: "0102452579", nama: "CLARISSA ALTHAFUNNISA" },
+            { nisn: "0104923377", nama: "Dhafa Hamzah Ariansyah" },
+            { nisn: "0082756707", nama: "Ahmad Sultan Hasyim" },
+            { nisn: "0105220587", nama: "ZULFIKAR FIQORI" },
+            { nisn: "0108878833", nama: "ARDIANSYAH" },
+            { nisn: "0105573339", nama: "LEONI JAMAR NINI SITUMEANG" },
+            { nisn: "0113025845", nama: "DIAJENG MARSHA CATOER POETRI ZAKARIA" },
+            { nisn: "0109680139", nama: "RIKHADATUL AZKIA" },
+            { nisn: "0102590497", nama: "NABILA OKTAVIANI" },
+            { nisn: "0116781064", nama: "MARCELA KAREEN HASIHOLAN LIM" },
+            { nisn: "0107034390", nama: "MUHAMMAD FARHAN PRATAMA" },
+            { nisn: "0101786434", nama: "MUHAMMAD IRFAN" },
+            { nisn: "0104826876", nama: "SALWA ATSILAH SHAFA" },
+            { nisn: "0102306579", nama: "Raynalnd Sinambela" },
+            { nisn: "0111835059", nama: "ADELIN FYKA YUNIAR" },
+            { nisn: "0101484444", nama: "MESSI MAULANA" },
+            { nisn: "0115962499", nama: "LATIFAH ASMI" },
+            { nisn: "0106315855", nama: "ALGAZORA HAMKA TINSAFARO" },
+            { nisn: "0109315925", nama: "KAYLA AMANDA SYAHPITRY" },
+            { nisn: "0093837800", nama: "MARUBA MALAU" },
+            { nisn: "0118142142", nama: "REINA ALYSHA WIBOWO" },
+            { nisn: "0101038644", nama: "ALIF RAHMAN HAKIM" },
+            { nisn: "0119333348", nama: "ZIREH NAZARET SIMANULLANG" },
+            { nisn: "0111461641", nama: "PRISKILA PUTRI VALENTIN" },
+            { nisn: "0104597213", nama: "RAY NANDA TOGATOROP" },
+            { nisn: "0113319150", nama: "Togu Mahendra Sitompul" },
+            { nisn: "0106357365", nama: "HARUMI AYANE" },
+            { nisn: "0101591128", nama: "Firrena Eka Putri" },
+            { nisn: "0111586280", nama: "KEVIN HOSEA TUMANGGOR" },
+            { nisn: "0094071298", nama: "AGUS PRATAMA" },
+            { nisn: "0106178700", nama: "RENDY PRATAMA SIANTURI" },
+            { nisn: "0106913511", nama: "DESTYLA CHAIRUNISA PUTRI" },
+            { nisn: "0115206822", nama: "TOGI PANGIHUTAN HUTAGAOL" },
+            { nisn: "0102593304", nama: "NATASYA LOVELY LADY" },
+            { nisn: "0109518694", nama: "RADEN MUHAMAD RAFI KHAIRULLAH" },
+            { nisn: "0107896944", nama: "MARSEL KLAUDYA SIHALOHO" },
+            { nisn: "0101693554", nama: "DZAKI KHAIRULLAH" },
+            { nisn: "0107749122", nama: "SAVANNAH LASHKARY DIO" },
+            { nisn: "0109957661", nama: "AIRIN YUNITA" },
+            { nisn: "0102605483", nama: "ALLFIAN NEVIN NAPITU" },
+            { nisn: "0113570688", nama: "VIERRA PUTERI VELENCIA" },
+            { nisn: "0103761147", nama: "LEONEL GUNAWAN" },
+            { nisn: "3117860937", nama: "FARRAS NAILAH ARKANA" },
+            { nisn: "0113965918", nama: "YESIKA CAROLIN SIAHAAN" },
+            { nisn: "0113957245", nama: "TIYASA HESI" },
+            { nisn: "0107436653", nama: "GZA SARTIWI" },
+            { nisn: "0105846225", nama: "TYASIGKA PRATIWI" },
+            { nisn: "0102411503", nama: "M. ANDRI PRAWIJAYA" },
+            { nisn: "0119603303", nama: "DWI SYAHPUTRI" },
+            { nisn: "0095539790", nama: "YAN AGUSTIAN" },
+            { nisn: "0098573150", nama: "SHERRYN ARUM MAHARANI" },
+            { nisn: "0117562725", nama: "AISYAH DELFINA BINTI MOH SADIQ" },
+            { nisn: "3113522439", nama: "FEBRIAN NABILISQI GUNAWAN" },
+            { nisn: "0104014180", nama: "WILLY ALBERT RIADY TOBING" },
+            { nisn: "0106936360", nama: "MUHAMMAD LABIB NICOLAS" },
+            { nisn: "0116292060", nama: "Zakia Khadijah" },
+            { nisn: "0106970963", nama: "IMAYANA MARIA SINAGA" },
+            { nisn: "0102160327", nama: "NOVI PUTRI ARSILIA" },
+            { nisn: "0106057851", nama: "LILIS KARLINA" },
+            { nisn: "0118744354", nama: "ADILLA QUINNSHA ZULATIFAH" },
+            { nisn: "0108365282", nama: "MUHAMMAD FAHRI ZAELANI ZULKARNAIAN" },
+            { nisn: "0101914313", nama: "FAHMI PRATAMA SYAHPUTRA" },
+            { nisn: "0118604087", nama: "ZAHIRA HANA ELISHA" },
+            { nisn: "0104453814", nama: "ANASTASYA RONA" },
+            { nisn: "0104760022", nama: "ULFAT SENA SAPUTRA" },
+            { nisn: "0115805042", nama: "CELLICA AMIRASANSARI" },
+            { nisn: "0112796576", nama: "ALMIRA SYAHIDA" },
+            { nisn: "0109740226", nama: "ALFA ONE GABE DOS PAULA TAMPUBOLON" },
+            { nisn: "0102959925", nama: "AWAN SATRIO" },
+            { nisn: "0103840498", nama: "Revand Renaldi Panjaitan" },
+            { nisn: "0108829199", nama: "ADITYA SAPUTRA PRAMADIAN" },
+            { nisn: "0093310275", nama: "YOSAN PATRA" },
+            { nisn: "0107420878", nama: "RAFAEL JULYAN PAKPAHAN" },
+            { nisn: "0102310648", nama: "MUHAMMAD LUTHFII ARYA HAMIZAN FAKHRI" },
+            { nisn: "0109588952", nama: "NABILA FATHARANI HANDOYO" },
+            { nisn: "0107262071", nama: "MUHAMMAD FITTO SAPUTRA" },
+            { nisn: "0112674665", nama: "CLARESYA TAMBUNAN" },
+            { nisn: "0106989426", nama: "WIKHO ALTHOF BILQISTHI" },
+            { nisn: "3112034042", nama: "ALDI FEBRIANTO" },
+            { nisn: "0103012498", nama: "KZA SARTIKA" },
+            { nisn: "0112175439", nama: "PUTRI ANGGITA AZ-ZAHRA" },
+            { nisn: "0115441456", nama: "FRANS KRISTIAN PARDEDE" },
+            { nisn: "0106797853", nama: "PUTRI AYU NOVITA SINAGA" },
+            { nisn: "0102743083", nama: "WINDU GISTARI" },
+            { nisn: "0103442111", nama: "RICHO RAFAEL PUTRA" },
+            { nisn: "0119574269", nama: "HANA HUMAIRA" },
+            { nisn: "0111070704", nama: "NAIRA FAZILATUNNISA" },
+            { nisn: "0107307534", nama: "THERESA CLAUDIA RAHMAWATI" },
+            { nisn: "0109565334", nama: "RADITYA SAPUTRA" },
+            { nisn: "0108012826", nama: "RATU CLAUDIA LAFATUNNISA" },
+            { nisn: "0106561903", nama: "DIKA ARDIANSYAH" },
+            { nisn: "0109428939", nama: "MUHAMMAD HABIB KUSUMA WARDHANA" },
+            { nisn: "0106656306", nama: "RAFA FIRMANSYAH" },
+            { nisn: "0107805284", nama: "ASYLLA PUTRI RAMADHANI" },
+            { nisn: "0109638493", nama: "DANIEL NOPRIYANTO SIALLAGAN" },
+            { nisn: "0113064435", nama: "Rahma Chairunnisya Dahyar" },
+            { nisn: "0109429946", nama: "HAIRIL FADLI" },
+            { nisn: "0112124622", nama: "ATHAYA FATHIAN GAOZHAN" },
+            { nisn: "0098891691", nama: "BINTANG MUTIARA SIHOMBING" },
+            { nisn: "0104227677", nama: "RIFQII OCTA DARMAWAN SIHALOHO" },
+            { nisn: "0096194580", nama: "Sufi Maulana" },
+            { nisn: "0109086401", nama: "RIRIN RUTMAWATI" },
+            { nisn: "0115428930", nama: "NABILA SATIVA APRIANI PUTRI" },
+            { nisn: "0109295655", nama: "ALZENA RUTHSANIYYAH" },
+            { nisn: "0118294333", nama: "Shabiya Kalea Rachmadi" },
+            { nisn: "0108052656", nama: "SAFA ANGELITA" },
+            { nisn: "0127874032", nama: "AVISA QUEEN" },
+            { nisn: "0105873959", nama: "RAISHA AFIFAH PUTRI" },
+            { nisn: "0103790985", nama: "SADDAM AKHORI KURNIADI YUSUF" },
+            { nisn: "0108104501", nama: "MUHAMMAD AKMAL MAULANA" },
+            { nisn: "0102659405", nama: "MOHAMMAD AL RAJA BUDIMAN" },
+            { nisn: "0105214850", nama: "MUHAMAD MAULANA" },
+            { nisn: "0106187687", nama: "RAFHAEL ARJUNA MAHENDRA" },
+            { nisn: "0114337833", nama: "M. RAZAQ KHAIRUL" },
+            { nisn: "0116640121", nama: "RENO NEVADA DESPERADO PANGARIBUAN" },
+            { nisn: "0118463436", nama: "MARIA MAGDALENA LUMBAN GAOL" },
+            { nisn: "0106081130", nama: "Akram Al Baihaqi" },
+            { nisn: "0107972263", nama: "AZZAHRA AHSA" },
+            { nisn: "0106804250", nama: "HIZKIA ALFARESA BAKO" },
+            { nisn: "0112922434", nama: "Sonia Marisabeth Simbolon" },
+            { nisn: "0101134720", nama: "BOLIVIA JENNSEN BR TOBING" },
+            { nisn: "0113586323", nama: "JOSUA NICKY ARMANDA BUTARBUTAR" },
+            { nisn: "0107214018", nama: "HARLYNO PASHA HERMAWAN" },
+            { nisn: "0107379355", nama: "YESKIA TESALONIKA SIMANJUNTAK" },
+            { nisn: "0092851393", nama: "AIRA ADHA" },
+            { nisn: "0103979538", nama: "MUHAMMAD REYVAN ALDERREN" },
+            { nisn: "0108658361", nama: "CLARA ADELINA AGUSTIN PURBA" },
+            { nisn: "0106950367", nama: "ADELIA MIRZA ATMARIANI" },
+            { nisn: "0107047853", nama: "ADIVIANSYAH RAHMAT RAMADHAN" },
+            { nisn: "0119739805", nama: "FATIN AYRA ADREENA" },
+            { nisn: "0106710527", nama: "AZ ZAHRA MULYANDARI" },
+            { nisn: "0103622725", nama: "MARCELL LASRO TUA SIRAIT" },
+            { nisn: "0105562857", nama: "M. RIZKI SEPTIAN" },
+            { nisn: "0101516443", nama: "Aatikah Khairullah" },
+            { nisn: "0106129476", nama: "OTHARI RASIYAH RAMADHANI" },
+            { nisn: "0106839342", nama: "FABIO HAFUZA" },
+            { nisn: "0114834351", nama: "BILQIS INKA SYAKILA" },
+            { nisn: "0113199636", nama: "Fahrend Rafael Simamora" },
+            { nisn: "0105129331", nama: "NUR FITRI" },
+            { nisn: "0107458013", nama: "ADARA NURFIANSYAH" },
+            { nisn: "0105308490", nama: "NAZWA AZWIRA SYAFITRI" },
+            { nisn: "0108718419", nama: "PUTRI PRUDENCE" },
+            { nisn: "0105072050", nama: "BISMA AFLAH RADITYA HARTONO" },
+            { nisn: "0104771577", nama: "FADHIL FADHALI" },
+            { nisn: "0106437226", nama: "RENDY ARDHIANSYAH" },
+            { nisn: "0108563459", nama: "KIYANDRA PAMUNGKAS" },
+            { nisn: "0116138495", nama: "FIKRI FAQIH" },
+            { nisn: "0105415153", nama: "BAIHAQI ALHAFIZH" },
+            { nisn: "0111735538", nama: "HERLY SINTARA SIMBOLON" },
+            { nisn: "0112181039", nama: "ANINDITA AZZAHRA HARAHAP" },
+            { nisn: "0119318411", nama: "ATHORIQ AHMAD BARAT" },
+            { nisn: "0101192756", nama: "GYBRAN ABYGAIL" },
+            { nisn: "0103809352", nama: "ANIS LULU FADILAH" },
+            { nisn: "0118637215", nama: "MUHAMMAD BAGATUR DYALMOKO" },
+            { nisn: "0104368509", nama: "ROVENCES YOSAVAT SITUMEANG" },
+            { nisn: "0107497227", nama: "Zivana Alayya Putri" },
+            { nisn: "0112106630", nama: "ASHILA ZULAIKHA" },
+            { nisn: "0104240718", nama: "AFIFAH SINURAYA" },
+            { nisn: "0118577057", nama: "ARYA BRATADIKARA TANDUKLANGI" },
+            { nisn: "0108276846", nama: "Nabil Hazlam Ahsana" },
+            { nisn: "0108681803", nama: "RIFQI HIDAYAT" },
+            { nisn: "0119147338", nama: "SANDRIA NAOMI LDYDIA PASARIBU" },
+            { nisn: "0113793834", nama: "Liyana Zahirah Ananta Hoddo" },
+            { nisn: "0114363678", nama: "ATHAYA KHANSA DHAU DASORI" },
+            { nisn: "3104572977", nama: "ACHMAD LUTHFI" },
+            { nisn: "0119806019", nama: "ATHAYA KHANSA ANDIKA" },
+            { nisn: "0118514798", nama: "HARIS ALVIAN SIMARMATA" },
+            { nisn: "0111585070", nama: "Feva Meisa" },
+            { nisn: "0118979771", nama: "AFRYANDI HAYKAL PUTRA" },
+            { nisn: "0117782069", nama: "I Putu Andrayuga" },
+            { nisn: "0114339294", nama: "Naomita Anggraeny Situmorang" },
+            { nisn: "0108233649", nama: "Ayuanita Firman" },
+            { nisn: "0103742672", nama: "MARIA ANABELLA SIRINGORINGO" },
+            { nisn: "0111567491", nama: "DUBAI AVRAM VIRHAQI" },
+            { nisn: "0109156039", nama: "ARDAN TITO APRILIANTO" },
+            { nisn: "0123365849", nama: "STEVEN IMMANUEL AUSTIN SITUMEANG" },
+            { nisn: "0109847986", nama: "WINDA VERLITA TAMBUNAN" },
+            { nisn: "0101287114", nama: "DEVINO IBRA MAULANA" },
+            { nisn: "0101513348", nama: "VICTOR GABRIEL SIREGAR" },
+            { nisn: "0119448819", nama: "ARGA PUTRA YADI" },
+            { nisn: "0102684168", nama: "ANINDAH GADIZA" },
+            { nisn: "0107425485", nama: "SHARMILA SHALEHA SYUKUR" },
+            { nisn: "0107206913", nama: "MUHAMMAD RAFA FIRMANSYAH" },
+            { nisn: "0103410835", nama: "ELVINDRA APRILIANO TAN" },
+            { nisn: "3108969519", nama: "TENGKU ABU HISAMUDIN SYAH" },
+            { nisn: "0103273389", nama: "ALVINO GIVSON SILALAHI" },
+            { nisn: "0105074449", nama: "SHINTYA REBECCA SIREGAR" },
+            { nisn: "0104933915", nama: "NOVITA NAPITUPULU" },
+            { nisn: "0102229076", nama: "NANCY OCTAVIA ABIGAIL" },
+            { nisn: "0114565632", nama: "SHAKILLA NAZWA" },
+            { nisn: "0109154546", nama: "Mikail Ardhan Alvaro" },
+            { nisn: "3119323825", nama: "PETRA ALFONSO" },
+            { nisn: "0112481310", nama: "SELYNAYSILLA INDAH" },
+            { nisn: "0115340797", nama: "RAJWA ASHILAH NADINE" },
+            { nisn: "0108104672", nama: "MUHAMMAD RISKY GUNAWAN" },
+            { nisn: "0118361961", nama: "FIORENZA NATASYA AUTRIN" },
+            { nisn: "3106540094", nama: "MUHAMAD NAUFAL HADI" },
+            { nisn: "0103810816", nama: "MUHAMMAD RIDWAN FADILAH" },
+            { nisn: "0115251707", nama: "Sarah Marsa Nathania" },
+            { nisn: "0119389689", nama: "SIVA STEFANI SAMOSIR" },
+            { nisn: "0114603731", nama: "YIZREEL HENRY WIJAYA" },
+            { nisn: "0109557870", nama: "DZAKY FURQAN SYAHBANDI" },
+            { nisn: "0109273986", nama: "RAFLI ANDADINATA" },
+            { nisn: "0104363490", nama: "ABDIEL ALFAYED" },
+            { nisn: "0162797179", nama: "SHEYLA ARTHA FALILA" },
+            { nisn: "0115437767", nama: "Fakhri Naufal Lesa Laode" },
+            { nisn: "0102995440", nama: "MUHAMMAD RAMADHANSYAH" },
+            { nisn: "0118912757", nama: "Dina Rahmania" },
+            { nisn: "0105097232", nama: "NADINE CANTIKA WIJAYA" },
+            { nisn: "0105405935", nama: "NATALISTI SUMAA" },
+            { nisn: "0109460726", nama: "Irsyadul Fikri" },
+            { nisn: "0105815468", nama: "ZHAHWA AHZAHRI" },
+            { nisn: "0115665373", nama: "AFIFAH ZAHRA" },
+            { nisn: "0101945806", nama: "NABILA RAMADHANI" },
+            { nisn: "0109665530", nama: "Agus Ramadanu" },
+            { nisn: "0106475397", nama: "RIFKA AGUSTINA HUTASOIT" },
+            { nisn: "0104244932", nama: "ANDRE ELIANSEN AMBARITA" },
+            { nisn: "0111513346", nama: "REBECCA GLORY" },
+            { nisn: "0108320717", nama: "ABID CAHYA ARDIANSYAH" },
+            { nisn: "0106170461", nama: "FIRMAN SANTOSO" },
+            { nisn: "0108578648", nama: "Farisa Regalia Putri" },
+            { nisn: "0103728415", nama: "MUHAMMAD FARDHAN AL FARIZZI" },
+            { nisn: "0101553256", nama: "AULIA RAHMA" },
+            { nisn: "0103637959", nama: "KHAIRISSA SEPTIANA" },
+            { nisn: "0111802309", nama: "GEMBIRA FRANSISKUS SINAGA" },
+            { nisn: "0097231493", nama: "FARYL MULYA KUSUMA" },
+            { nisn: "0108076103", nama: "ANGGI MEYSHA PUTRI" },
+            { nisn: "0107021345", nama: "KHANSA PUNIA ANIQAH" },
+            { nisn: "0092953312", nama: "BUNGA DESTIKA HARAHAP" },
+            { nisn: "0112888305", nama: "Sarah Jelita Siagian" },
+            { nisn: "0119695137", nama: "GERALDO CARLOS PASARIBU" },
+            { nisn: "0105167653", nama: "MUHAMMAD DAFA RENDI" },
+            { nisn: "0109672913", nama: "SALSA NURUL ASIQIN.E" },
+            { nisn: "0103087644", nama: "ALYSA TRIHAPSA" },
+            { nisn: "0104239071", nama: "PUTRI KUMAIRAH" },
+            { nisn: "0107594806", nama: "Nabiilah Syahfitri" },
+            { nisn: "0111622913", nama: "Yasrul Amrullah" },
+            { nisn: "0103032879", nama: "MHEMEY ESTERINA" },
+            { nisn: "0105747008", nama: "Rafael Yosef Kalinowski Situmorang" },
+            { nisn: "0107526328", nama: "ALMIRA PUTRI ALEYA" },
+            { nisn: "3119233874", nama: "MUHAMMAD RAZIQ RIFA'I" },
+            { nisn: "0107797840", nama: "MOHAMMAD RA'AFA JUBAIR" },
+            { nisn: "0117167257", nama: "ATIKA OLIVIA SARAGI" },
+            { nisn: "0106733087", nama: "MUHAMMAD DANISH HIDAYAT" },
+            { nisn: "0105184445", nama: "CHRISTIAN GULTOM" },
+            { nisn: "0103052697", nama: "MUHAMMAD DAFA ISMAIL" },
+            { nisn: "0102765062", nama: "MUHAMMAD FERDY GUNAWAN" },
+            { nisn: "0102183449", nama: "SAMUEL JECKSON BUTAR BUTAR" },
+            { nisn: "0102834932", nama: "MUHAMMAD FENDERICO PUTRA PRATAMA" },
+            { nisn: "0111201093", nama: "ANISA RAHMADANI" },
+            { nisn: "0106234776", nama: "PURWO SASONGKO" },
+            { nisn: "0108980632", nama: "MUHAMMAD ZAKY ULWAAN" },
+            { nisn: "0106162005", nama: "Marvelian Ahmad Devano" },
+            { nisn: "0115706672", nama: "PAREL TINO TARIHORAN" },
+            { nisn: "0107087802", nama: "LETICIA" },
+            { nisn: "0103938018", nama: "FITRI HASRA HUMMAIRAH" },
+            { nisn: "0101068236", nama: "NAZYLA SAHLA ANANTA" },
+            { nisn: "0109393103", nama: "ADVENTNIA NOVITA KRISTIANI PANJAITAN" },
+            { nisn: "0114660305", nama: "NUR FAHIRA" },
+            { nisn: "0101333908", nama: "ZAKI FADLUR RAHMAN. M" },
+            { nisn: "0102067527", nama: "RAHMA SAFITRI" },
+            { nisn: "0102020969", nama: "NUR AINI KHAIRINNISA" },
+            { nisn: "3113181121", nama: "MELANI AULYA PUTRI" },
+            { nisn: "0095688782", nama: "Ridho Irama" },
+            { nisn: "0104914275", nama: "AHMAD FIKRI" },
+            { nisn: "0102726583", nama: "Elviana Elva Cahyani" },
+            { nisn: "0107991451", nama: "Novitri Tiara Zahira" },
+            { nisn: "0117801119", nama: "ATIQAH HAURA ALINI" },
+            { nisn: "0114251460", nama: "KALEB MANURUNG" },
+            { nisn: "3109024583", nama: "SYAFIRA NURLITA ANDRIANA" },
+            { nisn: "0105582481", nama: "ADRIAN LEGAWA" },
+            { nisn: "0105637006", nama: "KEVIN AQLAN FAIZ ADITAMA" },
+            { nisn: "0107319049", nama: "DIANIERA EIGHT BUTARBUTAR" },
+            { nisn: "0102316782", nama: "FIORELITA LILIANA NASTITI WIYOKO" },
+            { nisn: "0117716493", nama: "RAKYAN HARYO WISANGGENI" },
+            { nisn: "0104775590", nama: "MUHAMMAD KHALID" },
+            { nisn: "0102061462", nama: "ATTAYA KALA KAMIL" },
+            { nisn: "0107810280", nama: "ARAI VALENTZAHID RAMDANI" },
+            { nisn: "0116212015", nama: "NEYSA AINUN MAHYA" },
+            { nisn: "0109800673", nama: "SAYYID IBRAHIM SARTELY" },
+            { nisn: "0105870523", nama: "RINALTY DINIA LOVE" },
+            { nisn: "0109779863", nama: "LAILATUL NAZWA KHAIRUNNISA" },
+            { nisn: "0106017536", nama: "AIREN RENATA SIMANJUNTAK" },
+            { nisn: "0104334735", nama: "DHIYA SALSABILA PUTRI ANDIKA" },
+            { nisn: "0111007102", nama: "GRETY APRILIA SIMAMORA" },
+            { nisn: "0116957789", nama: "R. MUHAMMAD SEBASTIAN RAMADDAN" },
+            { nisn: "0102027233", nama: "TERESYA ANANTA LOURE HUTAGAOL" },
+            { nisn: "0103866705", nama: "REZVAN HENDRAWAN" },
+            { nisn: "0101512665", nama: "KARISA INDRIA AMELIA" },
+            { nisn: "0119701041", nama: "AMIRA NORAINI KHOIRUNNISYA" },
+            { nisn: "0119994250", nama: "Muhammad Hassby" },
+            { nisn: "0102912417", nama: "MUHAMMAD FARREL FERDIAN" },
+            { nisn: "0106586604", nama: "JALILLAH RAMADHANTI" },
+            { nisn: "0106778648", nama: "Sabrina Nur Fitriyana" },
+            { nisn: "0103883329", nama: "Tifanny Aulia Elfitri" },
+            { nisn: "0109864040", nama: "AIRRA SYAHQUITA AZHANI" },
+            { nisn: "0118262419", nama: "MUHAMMAD FATHIR FATH" },
+            { nisn: "0101838768", nama: "DHAFIRO BAYU ADHITAMA" },
+            { nisn: "0113462939", nama: "NESY MARIA TAMPUBOLON" },
+            { nisn: "0108148270", nama: "EXSAUDI ARION SIAHAAN" },
+            { nisn: "0111736006", nama: "MUHAMMAD KHALAF ARIF MAULANA ZELMI" },
+            { nisn: "0101995018", nama: "MUHAMMAD AR RAZI RAMADHAN" },
+            { nisn: "0114836925", nama: "MUHAMMAD SYAFI ANUGRAH" },
+            { nisn: "0109132539", nama: "NADHIF ADITYA" },
+            { nisn: "0111343635", nama: "FOMALHAUT MUHAMMAD ALDERI" },
+            { nisn: "0115663929", nama: "Jenny Lusiyana Lubis" },
+            { nisn: "0106838998", nama: "ADILA AZURA" },
+            { nisn: "0104295060", nama: "SULTAN FAREL APRILIAN" },
+            { nisn: "0107443067", nama: "MUHAMMAD ZERICO ABIDIN AL-SUDAISH" },
+            { nisn: "0106328090", nama: "ADORA ADELIA ROHAYU" },
+            { nisn: "0109959382", nama: "ABIYZZHAFRAN ADITA" },
+            { nisn: "0116966288", nama: "BUNGA LEONIE SARASWATI SIHOMBING" },
+            { nisn: "0106788394", nama: "DEWI KARTIKA CHANDRA" },
+            { nisn: "0109463975", nama: "RADITYA NUR RAMADHAN" },
+            { nisn: "0112027759", nama: "ANDRE GUNAWAN" },
+            { nisn: "0107239823", nama: "SYARIFH NURMANSYAH" },
+            { nisn: "0105621761", nama: "OCTAVIA MELISA PUTRI" },
+            { nisn: "0099691880", nama: "RIZKY ADI NUGROHO" },
+            { nisn: "0092777640", nama: "LEWI PUTRA AMBARITA" },
+            { nisn: "0113043346", nama: "M. FEBRIAN NAZARBIRUN" },
+            { nisn: "3105587452", nama: "FAHRY ANGGARA" },
+            { nisn: "0113113804", nama: "NARADHISTY KHAIRINDA KUSUMA" },
+            { nisn: "3107976027", nama: "FELICIA PUTRI ARNELIA TAMPUBOLON" },
+            { nisn: "0118588569", nama: "GILANG PRATAMA" },
+            { nisn: "0101645125", nama: "ANUGRAH ADITRA FAHMI" },
+            { nisn: "0114912925", nama: "ARDINDA PUTRIANA" },
+            { nisn: "0107254602", nama: "MUHAMMAD BAYU SEGARA" },
+            { nisn: "0103237016", nama: "MUHAMMAD LUTHFI" },
+            { nisn: "0119385945", nama: "AMAR AMPO" }
+        ];
+
         const searchInput = document.getElementById('searchName');
         const resultContainer = document.getElementById('resultContainer');
+        const resultArea = document.getElementById('resultArea');
+        const defaultMsg = document.getElementById('defaultMsg');
 
-        // Event Listener untuk Pencarian
-        searchInput.addEventListener('input', function(e) {
-            const keyword = e.target.value.toUpperCase().trim();
+        function lakukanPencarian() {
+            const keyword = searchInput.value.toUpperCase().trim();
             resultContainer.innerHTML = '';
+            
+            // Tampilkan area hasil, sembunyikan pesan default
+            resultArea.classList.remove('hidden');
+            defaultMsg.classList.add('hidden');
 
             if(keyword.length === 0) {
-                resultContainer.innerHTML = '<p class="text-center text-sm text-gray-500 italic">Ketik nama untuk mencari...</p>';
+                resultContainer.innerHTML = `
+                    <div class="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
+                        <p>Nama tidak boleh kosong.</p>
+                    </div>
+                `;
                 return;
             }
 
-            // Filter data berdasarkan nama
+            // Filter data
             const results = studentData.filter(student => 
                 student.nama.toUpperCase().includes(keyword)
             );
 
             if(results.length === 0) {
                 resultContainer.innerHTML = `
-                    <div class="text-center py-4 text-gray-500">
-                        <p>Data tidak ditemukan.</p>
-                        <p class="text-xs">Coba cek ejaan nama.</p>
+                    <div class="text-center py-6 text-gray-500 bg-red-50 rounded-lg border border-red-100">
+                        <p class="font-medium text-red-600">Data tidak ditemukan</p>
+                        <p class="text-xs mt-1">Pastikan ejaan nama "${searchInput.value}" sudah benar.</p>
                     </div>
                 `;
             } else {
-                results.forEach(student => {
+                results.forEach((student, index) => {
                     const card = document.createElement('div');
-                    card.className = "bg-white p-3 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition flex justify-between items-center";
+                    // Tambahkan delay animasi berdasarkan index agar muncul berurutan
+                    card.style.animationDelay = `${index * 0.05}s`;
+                    card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition flex justify-between items-center animate-fade-in";
                     card.innerHTML = `
-                        <div>
-                            <p class="font-semibold text-gray-800">${student.nama}</p>
-                            <p class="text-xs text-gray-500">NISN</p>
+                        <div class="flex-1 min-w-0 mr-4">
+                            <p class="font-semibold text-gray-800 truncate">${student.nama}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Nomor Induk Siswa Nasional</p>
                         </div>
-                        <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-mono font-bold">
+                        <div class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-mono font-bold border border-blue-100 whitespace-nowrap">
                             ${student.nisn}
                         </div>
                     `;
                     resultContainer.appendChild(card);
                 });
+            }
+        }
+
+        // Event Listener untuk tombol Enter
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                lakukanPencarian();
             }
         });
     </script>
